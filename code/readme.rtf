@@ -1,0 +1,48 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf470
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\})}{\leveltext\leveltemplateid1\'02\'00);}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\})}{\leveltext\leveltemplateid101\'02\'00);}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{hyphen\}}{\leveltext\leveltemplateid102\'01\uc0\u8259 ;}{\levelnumbers;}\fi-360\li1440\lin1440 }{\listname ;}\listid2}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}}
+\margl1440\margr1440\vieww28600\viewh15280\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 This file will give short descriptions for all of the scripts contained in the folder \'93OpticFlow\'94, as well as a simple protocol for carrying out the experiment.\
+Written By Ionatan J. Kuperwajs, 8/3/16. Email ikuperwa@macalester.edu with any questions.\
+\
+Files (all matlab scripts use Psychtoolbox or no toolbox unless otherwise indicated):\
+calculate_flow_field.m - mathematically models an optic flow field by creating a matlab figure based on given translational and rotational components. \
+calculate_plane_flow_timestamps.m - helper script that calculates the velocity of each gabor on the screen by calculating a new Z value for each X,Y coordinate. Used for timestamp_heading.\
+calculate_plane_flow.m - helper script that calculates the velocity of each gabor on the screen by calculating a single Z value for all of the X,Y coordinates. Used for pattern_heading.\
+calculate_timestamps.m - mathematically models a series of optic flow fields (time stamps) by creating figures in matlab based on given translation and rotational components.\
+envelope_heading.m - program that runs different variations of the Warren and Hannon modeled stimuli based on input parameters. Used as a control/repeat of past experiments.\
+make_dot_plane.m - creates a plane of random dots. Used in all three different stimulus conditions.\
+OpticFlowAnalysis.R - analysis for data sets. Generates psychometric functions for each observer as well as a bias plot averaged across all participants. Uses quickpsy, an R package for creating psychometric functions. NOTE: for this to work with the timestamp_heading data as well, going to have to add in a way to compute the standard deviations from that data set and then edit the ggplot commands for the bias plot. This shouldn\'92t be too difficult, as it\'92s modeled for other conditions within the code already.\
+OpticFlowEyeAnal.m - utilizes MGL to plot mean eye data. Will need to be altered to test different lengths of trials as well as analyze different information from eye tracking.\
+pattern_heading.m - program that runs different variations of the experiment using phase motion stimulus based on input parameters.\
+project_dot_world.m - takes X,Y, Z 3-D dot positions and projects them onto 2-D x,y positions on the screen.\
+timestamp_heading.m - program that runs different variations of the experiment using phase motion stimuli and showing the evolution of the flow field over time based on input parameters.\
+update_dot_world.m - takes an array of dots and moves them to new positions on the screen. Used in envelope_heading. \
+\
+Protocol:\
+TO DO once in each experimental script:\
+\pard\tx220\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li720\fi-720\pardirnatural\partightenfactor0
+\ls1\ilvl0\cf0 {\listtext	1)	}Set number of trials per staircase. This is the the number of trials per condition. There are 12 total conditions: for envelope and phase there is translation only, real eye movement to the right and left, and simulated eye movement to the right and left. For timestamp there is only simulated eye movement to the right and left.\
+{\listtext	2)	}Decide how many training sessions are needed and how many of the 12 cases to run consecutively.\
+{\listtext	3)	}Locate the matlab file for the linearized gamma table in order to calibrate with the monitor that is being used. Place it in the \'93OpticFlow\'94 folder, and change the name of the file in the code. Set \'93linearize\'94 to 1.\
+{\listtext	4)	}Change the data path for files to be saved.\
+{\listtext	5)	}Change the size of the \'93view_window\'94 to match the dimensions of the monitor used.\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \
+TO DO for each experimental run:\
+\pard\tx220\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li720\fi-720\pardirnatural\partightenfactor0
+\ls2\ilvl0\cf0 {\listtext	1)	}Set the subject initials.\
+{\listtext	2)	}Set the subjectNumber.\
+{\listtext	3)	}Calibrate the eye tracker at the beginning of each session and set \'93eyeTracking\'94 to 1.\
+{\listtext	4)	}Randomly select out of the 12 conditions and set parameters accordingly:\
+\pard\tx940\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li1440\fi-1440\pardirnatural\partightenfactor0
+\ls2\ilvl1\cf0 {\listtext	\uc0\u8259 	}\'93rotation\'94 at either -2, 0, or 2 d/s (-2 is left, 0 is translation only, 2 is right).\
+{\listtext	\uc0\u8259 	}\'93fixateMovement\'94 at 0 for simulated trials and 1 for tracking trials.\
+{\listtext	\uc0\u8259 	}\'93trainingMode\'94 at 0 for real trials and 1 for training trial.\
+{\listtext	\uc0\u8259 	}\'93case_description\'94 with a descriptive name of the condition type.\
+}
