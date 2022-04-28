@@ -11,11 +11,24 @@
 \f0\fs24 \cf0 This file will give short descriptions for all of the scripts contained in the folder \'93objectMotion\'94, as well as a simple protocol for carrying out the experiment.\
 Written By Hope Lutwak. Email hlutwak@nyu.edu with any questions.\
 \
-Files (all matlab scripts use Psychtoolbox, VisTools):\
+Files (all matlab scripts use Psychtoolbox, VisTools, psignifit):\
 calculate_cloud_flow.m - calculate optic flow field in deg/s for a fixating, translating observer based on depth map, motion path placement, translation, view distance to screen, fixation distance\
 calculate_cloud_flow_screen.m - same as calculate_cloud_flow but velocity in m/s\
 control_3dsetup.m - control experiment\
+full_flow_3dsetup.m - full field flow experiment\
+get_theta_off_constraint.m - helper function to define velocities being tested (theta degrees polar angle around base velocity)\
+getT_eyecoords.m - helper function to convert translation into eye coordinates (changes when gaze is at ground)\
+lRangexxx.mat - various 3D scenes from radar data (Burge J, Geisler WS (2011). Optimal defocus estimation in individual natural images. Proceedings of the National Academy of Sciences, 108 (40): 16849-16854)\
+make_dot_cloud.m - determine overlapping random positions across visual field to show window of motion\
+make_dot_plane.m - same as cloud, distance defined by plane\
+make_surround.m - helper for control experiment to define positions of motion windows surrounding test locations. used for uniform surround velocity\
+make_surround_withflow.m - helper for control, same as make_surround but take on flow vectors from full field experiment \
+raytrace2eyeZ.m - help to calculate ground plane structure\
+sanitycheck_velocity.m - make sure display is correct based on calculations\
+simulations\
 \
+\
+*need to update the rest\
 \
 Protocol:\
 TO DO once in each experimental script:\
