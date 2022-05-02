@@ -14,7 +14,7 @@ addpath('/Users/hopelutwak/Documents/MATLAB/VisTools/')
     random_displacements = 1;
     
 %% Calculate constraint lines for each position
-[velocity_field, dots_deg, dev1, dots_m, dots_m_next,z0, gazeRotation, displacements] = get_velocity_field_frames(translation, depth_structure, devPos, displacement,random_displacements,view_dist);
+[velocity_field, dots_deg, dev1, dots_m, dots_m_next,z0, gazeRotation] = get_velocity_field_frames(translation, depth_structure, devPos, displacement,random_displacements,view_dist);
 
 dots_screen = view_dist*tand(dots_deg);
 velocity_field_screen = calculate_cloud_flow_screen(dots_m(3,:), dots_deg, translation, view_dist, z0);
@@ -54,16 +54,8 @@ dev = find(abs(velocity_field(2,:)-(slope.*velocity_field(1,:)+intercept))>10^-6
 %     
 %     theta(v) = acosd(dot(unit_deg(:,v), unit_screen(:,v)));
 % end
-figure, quiver(dots_screen(1,:), -dots_screen(2,:), velocity_field(1,:), -velocity_field(2,:), 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
 
-uncentered = plane_field_screen+dots_screen;
-uncentered2 = plane_field_screen2+dots_screen;
-for segment = 1:length(velocity_field)
 
-    hold on, plot([uncentered(1,segment) uncentered2(1,segment)], -[uncentered(2,segment) uncentered2(2,segment)], 'b')
-end
-    
-    
 %% plot velocity field and save
 figure, quiver(dots_screen(1,:), -dots_screen(2,:), velocity_field(1,:), -velocity_field(2,:), 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
 

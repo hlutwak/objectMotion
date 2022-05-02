@@ -1,13 +1,13 @@
-function  [velocity_field, dots_deg, dev1, dots_m,dots_m_next,z0, gazeRotation, displacements]= get_velocity_field_frames(translate, depth_structure, devPos, displacement, random_displacements, view_dist)
+function  [velocity_field, dots_deg, dev1, dots_m,dots_m_next,z0, gazeRotation]= get_velocity_field_frames(translate, depth_structure, devPos, displacement, view_dist)
 if nargin==0
     translate = [0,  0.05, 1.4];
     depth_structure = 2;
     devPos = [5;3]; % y axis flipped
     view_dist = .35;
     displacement = [0,0,-translate(3)]; %move forward, not rigid
-    random_displacements = 0;
 end
 
+random_displacements = 1;
 if random_displacements
     num_disp = 10;
     frame_rate = 25;
@@ -195,12 +195,13 @@ if random_displacements
         if dots_m(3,r(ii)) < 6
             displacements(:,ii) = -.05*rand(3,1)+.05;
         else
-            displacements(:,ii) = -2*rand(3,1)+2;
+            displacements(:,ii) = -5*rand(3,1)+5;
         end
     end
     displacements = displacements./frame_rate;
     dots_m(:,r) = dots_m(:,r)+displacements;
 end
+
 
 
 % change world position of dot corresponding to original deviation position
