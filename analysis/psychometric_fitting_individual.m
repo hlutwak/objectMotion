@@ -14,7 +14,7 @@ S = dir(fullfile(dataFolder,'*.mat'));
 
 % which subject data to analyze
 subject = ["CR"]; %"ABC", "HL","MR", "KB", "KZ"
-stim = "_natural"; % '_GP_T1' '_GP_T2' 'C_natural'  **(T1 = [0 .05 1.4], T2 = [0 .5 1.4])**
+stim = "_GP_T2"; % '_GP_T1' '_GP_T2' 'C_natural'  **(T1 = [0 .05 1.4], T2 = [0 .5 1.4])**
 
 
 %load appropriate files

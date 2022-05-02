@@ -33,12 +33,33 @@ intercept = plane_field_screen(2,:)-slope.*plane_field_screen(1,:); % get interc
 
 
 % d = abs(velocity_field(2,:)-(slope.*velocity_field(1,:)+intercept));
+x1 = plane_field_screen(1,:);
+y1 = plane_field_screen(2,:);
+x2 = plane_field_screen2(1,:);
+y2 = plane_field_screen2(2,:);
+x0 = velocity_field(1,:);
+y0 = velocity_field(2,:);
 
-d = abs(slope.*velocity_field(1,:) - velocity_field(2,:) + intercept)./(slope.^2 + intercept.^2);
+d = abs((x2-x1).*(y1-y0)-(x1-x0).*(y2-y1))./sqrt((x2-x1).^2 + (y2-y1).^2);
+
+% d = abs(slope.*velocity_field(1,:) - velocity_field(2,:) + intercept)./(slope.^2 + intercept.^2);
+
+% compute distance to line segment
+distancep2a = sqrt((velocity_field(1,:)-plane_field_screen(1,:)).^2 + (velocity_field(2,:)-plane_field_screen(2,:)).^2);
+distancep2b = sqrt((velocity_field(1,:)-plane_field_screen2(1,:)).^2 + (velocity_field(2,:)-plane_field_screen2(2,:)).^2);
+distancea2b = sqrt((plane_field_screen(1,:)-plane_field_screen2(1,:)).^2 + (plane_field_screen(2,:)-plane_field_screen2(2,:)).^2);
+ratio = distancep2a./distancea2b;
+
+
+idx_mind2point = find(ratio >1);
+
+d(idx_mind2point) = min(distancep2a(idx_mind2point), distancep2b(idx_mind2point));
+
+
 d = d/max(d);
 d = 1-d;
 c = repmat(d', 1,3);
-figure, hold on, scatter(dots_screen(1,:), -dots_screen(2,:),[],c) 
+figure, hold on, scatter(dots_deg(1,:), -dots_deg(2,:),100,c) 
 
 %find where there's object motion
 
