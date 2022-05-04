@@ -195,11 +195,13 @@ if random_displacements
         if dots_m(3,r(ii)) < 6
             displacements(:,ii) = -.05*rand(3,1)+.05;
         else
-            displacements(:,ii) = -2*rand(3,1)+2;
+            displacements(:,ii) = 2*rand(3,1)-1;
         end
     end
     displacements = displacements./frame_rate;
     dots_m(:,r) = dots_m(:,r)+displacements;
+else
+    displacements = [];
 end
 
 

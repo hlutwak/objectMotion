@@ -298,6 +298,7 @@ axis equal
 
  
 % set(gcf,'renderer','Painters')
+savepath(
 % saveas(thresholdfig, stim, 'eps')
 
 % figure 

@@ -5,7 +5,7 @@ addpath(genpath('/Applications/Psychtoolbox'))
 addpath('/Users/hopelutwak/Documents/MATLAB/VisTools/')
 %% Generate scene
     frame_rate = 25;
-    translation = [0,  -0.1, 1.4]/frame_rate;
+    translation = [0,  -0.25, 1.4]/frame_rate;
     depth_structure = 2;
     devPos = [5;3];
     weberFrac = 1;
@@ -14,12 +14,13 @@ addpath('/Users/hopelutwak/Documents/MATLAB/VisTools/')
     random_displacements = 1;
     
 %% Calculate constraint lines for each position
+close all
 [velocity_field, dots_deg, dev1, dots_m, dots_m_next,z0, gazeRotation, displacements] = get_velocity_field_frames(translation, depth_structure, devPos, displacement,random_displacements,view_dist);
 
 dots_screen = view_dist*tand(dots_deg);
 velocity_field_screen = calculate_cloud_flow_screen(dots_m(3,:), dots_deg, translation, view_dist, z0);
-plane_field_screen = calculate_cloud_flow_screen(ones(1, length(dots_deg))*min(dots_m(3,:))-1, dots_deg, translation, view_dist, z0);
-plane_field_screen2 = calculate_cloud_flow_screen(ones(1, length(dots_deg))*max(dots_m(3,:))+1, dots_deg, translation, view_dist, z0);
+plane_field_screen = calculate_cloud_flow_screen(ones(1, length(dots_deg))*.5, dots_deg, translation, view_dist, z0);
+plane_field_screen2 = calculate_cloud_flow_screen(ones(1, length(dots_deg))*1000, dots_deg, translation, view_dist, z0);
 
 % plane_field2 = calculate_cloud_flow_screen(ones(1, length(dots_deg))*(min(dots_m(3,:))+max(dots_m(3,:)))/2, dots_deg, translation, view_dist, z0);
 % plane_field3 = calculate_cloud_flow_screen(ones(1, length(dots_deg))*max(dots_m(3,:)), dots_deg, translation, view_dist, z0);
@@ -59,11 +60,20 @@ d(idx_mind2point) = min(distancep2a(idx_mind2point), distancep2b(idx_mind2point)
 d = d/max(d);
 d = 1-d;
 c = repmat(d', 1,3);
-figure, hold on, scatter(dots_deg(1,:), -dots_deg(2,:),100,c) 
+
+
+figure(1)
+scatter(dots_deg(1,:), -dots_deg(2,:),100,c, 'filled')
 
 %find where there's object motion
 
-dev = find(abs(velocity_field(2,:)-(slope.*velocity_field(1,:)+intercept))>10^-6)
+dev = find(abs(velocity_field(2,:)-(slope.*velocity_field(1,:)+intercept))>10^-6);
+figure(2)
+quiver(dots_screen(1,:), -dots_screen(2,:), velocity_field(1,:), -velocity_field(2,:), 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
+hold on, scatter(dots_screen(1,dev), -dots_screen(2,dev), 100)
+% set(gcf,'renderer','Painters'), saveas(gcf, 'deviations','eps')
+% hold on, scatter(dots_screen(1,:), -dots_screen(2,:),100,c, 'filled') 
+
 
 % figure, quiver([dots_screen(1,:),dots_screen(1,:),dots_screen(1,:)], -[dots_screen(2,:), dots_screen(2,:), dots_screen(2,:)], [velocity_field(1,:), velocity_field_screen(1,:), plane_field_screen(1,:)], -[velocity_field(2,:), velocity_field_screen(2,:), plane_field_screen(2,:)])
 
@@ -75,16 +85,21 @@ dev = find(abs(velocity_field(2,:)-(slope.*velocity_field(1,:)+intercept))>10^-6
 %     
 %     theta(v) = acosd(dot(unit_deg(:,v), unit_screen(:,v)));
 % end
-figure, quiver(dots_screen(1,:), -dots_screen(2,:), velocity_field(1,:), -velocity_field(2,:), 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
 
-uncentered = plane_field_screen+dots_screen;
-uncentered2 = plane_field_screen2+dots_screen;
-for segment = 1:length(velocity_field)
-
-    hold on, plot([uncentered(1,segment) uncentered2(1,segment)], -[uncentered(2,segment) uncentered2(2,segment)], 'b')
+    
+    
+%% plot constraint lines
+segment_begin = plane_field_screen+ dots_screen;
+segment_end = plane_field_screen2 + dots_screen;
+figure
+for s = 1:length(dots_deg)
+    hold on
+    plot([segment_begin(1,s) segment_end(1,s)], -[segment_begin(2,s) segment_end(2,s)], 'k')
 end
     
-    
+hold on, scatter(velocity_field(1,:)+dots_screen(1,:), -(velocity_field(2,:)+dots_screen(2,:)), 'filled')
+hold on, scatter(velocity_field(1,dev)+dots_screen(1,dev), -(velocity_field(2,dev)+dots_screen(2,dev)), 'r', 'filled')
+
 %% plot velocity field and save
 figure, quiver(dots_screen(1,:), -dots_screen(2,:), velocity_field(1,:), -velocity_field(2,:), 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
 
