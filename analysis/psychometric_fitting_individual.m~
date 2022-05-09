@@ -13,7 +13,7 @@ dataFolder = '/Users/hopelutwak/Desktop/objectMotion/data';
 S = dir(fullfile(dataFolder,'*.mat'));
 
 % which subject data to analyze
-subject = ["HL"]; %"ABC", "HL","MR", "KB", "KZ", "CR", "ET"
+subject = ["HL"]; %"ABC", "HL","MR", "KB", "KZ", "ER"
 stim = "_CtruncGP_T1"; % '_GP_T1' '_GP_T2' 'C_natural'  **(T1 = [0 .05 1.4], T2 = [0 .5 1.4])**
 
 
@@ -239,8 +239,8 @@ end
 % xlim([-.1, .6])
 % ylim([-.35, .2])
  
-% set(gcf,'renderer','painters')
-% saveas(gcf, 'natural', 'eps')
+% set(gcf,'renderer','Painters')
+% saveas(thresholdfig, control_thresh, 'eps')
 
 % figure 
 % errorbar

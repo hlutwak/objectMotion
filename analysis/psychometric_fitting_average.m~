@@ -15,8 +15,8 @@ dataFolder = '/Volumes/GoogleDrive/My Drive/opticflow/objectDetection/OpticFlow/
 S = dir(fullfile(dataFolder,'*.mat'));
 
 % which subjects data to analyze
-subjects = ["ABC", "HL","MR", "KZ", "CR"]; %"ABC", "HL","MR", "KB", "KZ"
-stims = "_GP_T1";
+subjects = ["ABC", "HL","MR", "KZ", "CR", "ET"]; %"ABC", "HL","MR", "KB", "KZ"
+stims = "_CtruncGP_T1";
 
 % loop over all subjects
 figure
@@ -221,18 +221,34 @@ hold on, fill([velocity_sem_low(1,:) velocity_sem_low(1,1)],-[velocity_sem_low(2
 hold on, plot([velocity_thresh(1,:) velocity_thresh(1,1)],-[velocity_thresh(2,:) velocity_thresh(2,1)], 'color',colors(1,:), 'linewidth', 2)
 
 %include individual thresholds
+% if include_individuals
+%     for s = 1:length(subjects)
+%         hold on
+%         
+%         if control
+%             c = grays(s,:);
+%             scatter(velocity_thresholds(1,:,s), -velocity_thresholds(2,:,s), [],c,'filled')
+%         else
+%             c = blues(s,:);
+%             scatter(velocity_thresholds(1,:,s), -velocity_thresholds(2,:,s), [],c,'filled')
+%         end
+%     end
+% end
+
 if include_individuals
+    c = zeros(length(subjects)*n_conditions, 3);
+    if control
+        color = grays;
+    else
+        color = blues;
+    end
     for s = 1:length(subjects)
-        hold on
-        
-        if control
-            c = grays(s,:);
-            scatter(velocity_thresholds(1,:,s), -velocity_thresholds(2,:,s), [],c,'filled')
-        else
-            c = blues(s,:);
-            scatter(velocity_thresholds(1,:,s), -velocity_thresholds(2,:,s), [],c,'filled')
+        for conds = 1:n_conditions
+            c(conds,:) = grays(s,:);
         end
     end
+    
+        
 end
 % plot base velocity
 hold on, quiver(0, 0, data(cond_idx(2)).steps(1,end,1), -data(cond_idx(2)).steps(2,end,1), 'Color', 'k','LineWidth', 2,'AutoScaleFactor',1)
@@ -298,7 +314,6 @@ axis equal
 
  
 % set(gcf,'renderer','Painters')
-savepath(
 % saveas(thresholdfig, stim, 'eps')
 
 % figure 
