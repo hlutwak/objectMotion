@@ -16,7 +16,7 @@ S = dir(fullfile(dataFolder,'*.mat'));
 
 % which subjects data to analyze
 subjects = ["ABC", "HL","MR", "KZ", "CR", "ET"]; %"ABC", "HL","MR", "KB", "KZ", "CR", "ET"
-stims = "_GP_T1";
+stims = "_CtruncGP_T1";
 
 % plot individual thresholds
 include_individuals = 1;
@@ -169,12 +169,6 @@ end
 % plot thresholds in velocity space
 
 avg = mean(thresholds);
-%save averages to do ttest
-if control
-    thresholds_control = thresholds;
-else
-    thresholds_full = thresholds;
-end
 
 sem = std(thresholds); %/sqrt(length(subjects))
 
@@ -277,15 +271,7 @@ axis equal
 
 figure
 
-    
-hold on,errorbar(sorted_unique_deltaAngles, avg, sem,  'color',colors(1,:), 'linewidth', 2)
-
-%% ttest
-pvals = zeros(1,n_conditions);
-for c = 1:n_conditions
-    [h,p] = ttest(thresholds_control(:,c), thresholds_full(:,c));
-    pvals(c) = p;
-end
+hold on,errorbar(sorted_unique_deltaAngles, avg, sem)
 
 %% individual thresholds and confidence intervals
 
