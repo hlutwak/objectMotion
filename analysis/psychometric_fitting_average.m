@@ -15,11 +15,11 @@ dataFolder = '/Volumes/GoogleDrive/My Drive/opticflow/objectDetection/OpticFlow/
 S = dir(fullfile(dataFolder,'*.mat'));
 
 % which subjects data to analyze
-subjects = ["ABC", "HL","MR", "KZ", "CR"]; %"ABC", "HL","MR", "KB", "KZ", "CR", "ET"
-stims = "_Ctruncnatural";
+subjects = ["ABC", "HL","MR", "KZ", "CR", "ET"]; %"ABC", "HL","MR", "KB", "KZ", "CR", "ET"
+stims = "_CtruncGP_T1";
 
 % plot individual thresholds
-include_individuals = 0;
+include_individuals = 1;
 
 % loop over all subjects
 figure
@@ -254,6 +254,7 @@ if include_individuals
     
     thresholds = reshape(velocity_thresholds, 2, length(subjects)*n_conditions);
     hold on, scatter(thresholds(1,:), -thresholds(2,:), [],c,'filled')
+    hold on, scatter(thresholds(1,:), -thresholds(2,:), 100,'k')
         
 end
 

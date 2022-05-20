@@ -4,14 +4,14 @@ addpath(genpath('/Users/hopelutwak/Desktop/objectMotion'))
 addpath(genpath('/Applications/Psychtoolbox'))
 addpath('/Users/hopelutwak/Documents/MATLAB/VisTools/')
 %% Generate scene
-    frame_rate = 25;
-    translation = [0,  -0.25, 1.4]/frame_rate;
+    frame_rate = 85;
+    translation = [0,  0.05, 1.4]/frame_rate;
     depth_structure = 2;
     devPos = [5;3];
     weberFrac = 1;
     view_dist = .35;
-    displacement = [-.01,-0,0]'/frame_rate;
-    random_displacements = 1;
+%     displacement = [-.01,-0,0]'/frame_rate;
+%     random_displacements = 1;
     
 %% Calculate constraint lines for each position
 close all
@@ -99,6 +99,19 @@ end
     
 hold on, scatter(velocity_field(1,:)+dots_screen(1,:), -(velocity_field(2,:)+dots_screen(2,:)), 'filled')
 hold on, scatter(velocity_field(1,dev)+dots_screen(1,dev), -(velocity_field(2,dev)+dots_screen(2,dev)), 'r', 'filled')
+
+
+
+%% recaulculating depth constraint
+[velocity_field, dots_deg, dev1, dots_m,z0]= get_velocity_field_full(translation, depth_structure, devPos, view_dist);
+
+translation = [0,-0.0722083049421342,1.39903036446583]/frame_rate;
+plane_field_screen = calculate_cloud_flow(ones(1, length(dots_deg))*.5, dots_deg, translation, view_dist, z0);
+plane_field_screen2 = calculate_cloud_flow(ones(1, length(dots_deg))*100000, dots_deg, translation, view_dist, z0);
+
+figure
+quiver(0, 0, velocity_field(1,dev1), -velocity_field(2,dev1),'Color', 'k','LineWidth', 2,'AutoScaleFactor',1)
+hold on, plot([plane_field_screen(1,dev1) plane_field_screen2(1,dev1)],-[plane_field_screen(2,dev1), plane_field_screen2(2,dev1)], 'color', [.5 .5 .5], 'linewidth', 2), axis equal
 
 %% plot velocity field and save
 figure, quiver(dots_screen(1,:), -dots_screen(2,:), velocity_field(1,:), -velocity_field(2,:), 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal

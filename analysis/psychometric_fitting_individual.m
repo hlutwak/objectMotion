@@ -13,8 +13,8 @@ dataFolder = '/Users/hopelutwak/Desktop/objectMotion/data';
 S = dir(fullfile(dataFolder,'*.mat'));
 
 % which subject data to analyze
-subject = ["HL"]; %"ABC", "HL","MR", "KB", "KZ", "CR", "ET"
-stim = "_CtruncGP_T1"; % '_GP_T1' '_GP_T2' 'C_natural'  **(T1 = [0 .05 1.4], T2 = [0 .5 1.4])**
+subject = ["MR"]; %"ABC", "HL","MR", "KB", "KZ", "CR", "ET"
+stim = "_natural"; % '_GP_T1' '_GP_T2' 'C_natural'  **(T1 = [0 .05 1.4], T2 = [0 .5 1.4])**
 
 
 %load appropriate files
@@ -221,6 +221,7 @@ hold on, fill([velocity_CI_high(1,:) velocity_CI_high(1,1)],-[velocity_CI_high(2
 hold on, fill([velocity_CI_low(1,:) velocity_CI_low(1,1)],-[velocity_CI_low(2,:) velocity_CI_low(2,1)], 'w', 'LineStyle','none')
 % plot thresholds
 hold on, plot([velocity_thresh(1,:) velocity_thresh(1,1)],-[velocity_thresh(2,:) velocity_thresh(2,1)], 'color',colors(1,:), 'linewidth', 2)
+
 % plot base velocity
 hold on, quiver(0, 0, data(cond_idx(2)).steps(1,end,1), -data(cond_idx(2)).steps(2,end,1), 'Color', 'k','LineWidth', 2,'AutoScaleFactor',1)
 % % plot constraint line
@@ -238,9 +239,9 @@ if num_t ==2
 end
 % xlim([-.1, .6])
 % ylim([-.35, .2])
- 
+
 % set(gcf,'renderer','painters')
-% saveas(gcf, 'natural', 'eps')
+% saveas(gcf, 'MRT2', 'eps')
 
 % figure 
 % errorbar
