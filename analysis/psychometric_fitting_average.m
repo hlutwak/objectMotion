@@ -16,13 +16,14 @@ S = dir(fullfile(dataFolder,'*.mat'));
 
 % which subjects data to analyze
 subjects = ["ABC", "HL","MR", "KZ", "CR", "ET"]; %"ABC", "HL","MR", "KB", "KZ", "CR", "ET"
-stims = "_GP_T1";
+stims = "_Ctruncnatural";
 
 % plot individual thresholds
 include_individuals = 1;
 
 % loop over all subjects
 figure
+num_subj = 0;
 for s  = 1:length(subjects)
 
 
@@ -46,7 +47,7 @@ for s  = 1:length(subjects)
     end
     
     if ~isempty(data)
-        
+        num_subj = num_subj+1;
         % is it a control stim
         if contains(stims, 'C')
             control = 1;
@@ -258,9 +259,8 @@ if include_individuals
         end
     end
     
-    thresholds = reshape(velocity_thresholds, 2, length(subjects)*n_conditions);
-    hold on, scatter(thresholds(1,:), -thresholds(2,:), [],c,'filled')
-%     hold on, scatter(thresholds(1,:), -thresholds(2,:), 100,'k')
+    individuals = reshape(velocity_thresholds, 2, length(subjects)*n_conditions);
+    hold on, scatter(individuals(1,:), -individuals(2,:), [],c,'filled')
         
 end
 
@@ -273,19 +273,66 @@ end
 
 axis equal
 
-%% plot thresholds linearly
+% normalized thresholds
+base_velocity = data(cond_idx(2)).steps(:,end,1);
+base = norm(base_velocity);
+
+normalized = figure;
+
+% plot SEMs
+hold on, fill([velocity_sem_high(1,:) velocity_sem_high(1,1)]./base,-[velocity_sem_high(2,:) velocity_sem_high(2,1)]./base, colors(2,:), 'LineStyle','none', 'FaceAlpha',0.5)
+hold on, fill([velocity_sem_low(1,:) velocity_sem_low(1,1)]./base,-[velocity_sem_low(2,:) velocity_sem_low(2,1)]./base, 'w', 'LineStyle','none')
+
+% plot thresholds
+hold on, plot([velocity_thresh(1,:) velocity_thresh(1,1)]./base,-[velocity_thresh(2,:) velocity_thresh(2,1)]./base, 'color',colors(1,:), 'linewidth', 2)
+
+if include_individuals
+    c = [];
+    if control
+        color = grays;
+    else
+        color = blues;
+    end
+    for s = 1:length(subjects)
+        for conds = 1:n_conditions
+            c = [c; color(s,:)];
+        end
+    end
+    
+    individuals = reshape(velocity_thresholds, 2, length(subjects)*n_conditions);
+    hold on, scatter(individuals(1,:)./base, -individuals(2,:)./base, [],c,'filled')
+        
+end
+
+% plot base velocity
+hold on, quiver(0, 0, data(cond_idx(2)).steps(1,end,1)./base, -data(cond_idx(2)).steps(2,end,1)./base, 'Color', 'k','LineWidth', 2,'AutoScaleFactor',1)
+% % plot constraint line
+if ~control
+    hold on, plot(data(cond_idx(2)).velocity_range(1,:,1)./base, -data(cond_idx(2)).velocity_range(2,:,1)./base, 'color', [.5 .5 .5], 'linewidth', 2)
+end
+
+axis equal
+
+%% plot thresholds angle vs step
+
+standard_angles = [0 45 90 135 180 225 270 315];
+constraint = ~ismember(sorted_unique_deltaAngles, standard_angles);
+
+avg_control = mean(thresholds_control);
+std_control = std(thresholds_control);
+avg_full = mean(thresholds_full);
+std_full = std(thresholds_full);
 
 figure
+hold on,errorbar(sorted_unique_deltaAngles, avg_control, std_control,  'color',[.5 .5 .5], 'linewidth', 2)
+hold on, errorbar(sorted_unique_deltaAngles, avg_full, std_full,  'color',[.2 .2 .7], 'linewidth', 2)
+hold on, scatter(sorted_unique_deltaAngles(constraint), [1 1], 100,'r', 'filled')
 
-    
-hold on,errorbar(sorted_unique_deltaAngles, avg, sem,  'color',colors(1,:), 'linewidth', 2)
+% ttest
+[h, p] = ttest(thresholds_control, thresholds_full);
+h = logical(h);
+hold on, scatter(sorted_unique_deltaAngles(h), [1.5], 100, 'k*')
 
-%% ttest
-pvals = zeros(1,n_conditions);
-for c = 1:n_conditions
-    [h,p] = ttest(thresholds_control(:,c), thresholds_full(:,c));
-    pvals(c) = p;
-end
 
 %% individual thresholds and confidence intervals
 

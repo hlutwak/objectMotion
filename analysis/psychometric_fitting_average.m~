@@ -16,7 +16,7 @@ S = dir(fullfile(dataFolder,'*.mat'));
 
 % which subjects data to analyze
 subjects = ["ABC", "HL","MR", "KZ", "CR", "ET"]; %"ABC", "HL","MR", "KB", "KZ", "CR", "ET"
-stims = "_CtruncGP_T1";
+stims = "_GP_T1";
 
 % plot individual thresholds
 include_individuals = 1;
@@ -169,6 +169,12 @@ end
 % plot thresholds in velocity space
 
 avg = mean(thresholds);
+%save averages to do ttest
+if control
+    thresholds_control = thresholds;
+else
+    thresholds_full = thresholds;
+end
 
 sem = std(thresholds); %/sqrt(length(subjects))
 
@@ -252,9 +258,8 @@ if include_individuals
         end
     end
     
-    thresholds = reshape(velocity_thresholds, 2, length(subjects)*n_conditions);
-    hold on, scatter(thresholds(1,:), -thresholds(2,:), [],c,'filled')
-%     hold on, scatter(thresholds(1,:), -thresholds(2,:), 100,'k')
+    individuals = reshape(velocity_thresholds, 2, length(subjects)*n_conditions);
+    hold on, scatter(individuals(1,:), -individuals(2,:), [],c,'filled')
         
 end
 
@@ -267,11 +272,26 @@ end
 
 axis equal
 
-%% plot thresholds linearly
+%% plot thresholds angle vs step
+
+standard_angles = [0 45 90 135 180 225 270 315];
+constraint = ~ismember(sorted_unique_deltaAngles, standard_angles);
+
+avg_control = mean(thresholds_control);
+std_control = std(thresholds_control);
+avg_full = mean(thresholds_full);
+std_full = std(thresholds_full);
 
 figure
-
-hold on,errorbar(sorted_unique_deltaAngles, avg, sem)
+hold on,errorbar(sorted_unique_deltaAngles, avg_control, std_control,  'color',[.5 .5 .5], 'linewidth', 2)
+hold on, errorbar(sorted_unique_deltaAngles, avg_full, std_full,  'color',[.2 .2 .7], 'linewidth', 2)
+hold on, scatter(sorted_unique_deltaAngles(constraint), [1 1], 100,'r', 'filled')
+% ttest
+pvals = zeros(1,n_conditions);
+for c = 1:n_conditions
+    [h,p] = ttest(thresholds_control(:,c), thresholds_full(:,c));
+    pvals(c) = p;
+end
 
 %% individual thresholds and confidence intervals
 
