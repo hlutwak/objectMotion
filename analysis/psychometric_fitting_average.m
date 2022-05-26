@@ -15,7 +15,7 @@ dataFolder = '/Volumes/GoogleDrive/My Drive/opticflow/objectDetection/OpticFlow/
 S = dir(fullfile(dataFolder,'*.mat'));
 
 % which subjects data to analyze
-subjects = ["ABC", "HL","MR", "KZ", "CR", "ET"]; %"ABC", "HL","MR", "KB", "KZ", "CR", "ET"
+subjects = ["ABC", "HL","MR", "KZ", "CR", "ET", "RJE"]; %"ABC", "HL","MR", "KB", "KZ", "CR", "ET"
 stims = "_Ctruncnatural";
 
 % plot individual thresholds
