@@ -32,7 +32,7 @@ addpath('/Users/hopelutwak/Documents/MATLAB/VisTools/')
     n_anchors                       = n_trials/1.2*.2;                                % n_trials/1.2*.2;
     translation                     = [0, .05, 1.4];                            % m/s [0, .05, 1.4]
 %                                                                         % deg/s *up is down and down is up
-    weberFrac                       = .5;                                    % magnitude deviation vector deg/s
+    weberFrac                       = 1.5;                                    % magnitude deviation vector deg/s
     scramble                        = 0;                                    % scramble surround with optic flow info, 0 is same velociy in surround
     depth_structure                 = 2;                                    % 0 = random cloud, 1 = ground plane, 2 = natural scene , 3 = defined 3D scene
     ds                              = [];

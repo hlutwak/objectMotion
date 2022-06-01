@@ -15,8 +15,8 @@ dataFolder = '/Volumes/GoogleDrive/My Drive/opticflow/objectDetection/OpticFlow/
 S = dir(fullfile(dataFolder,'*.mat'));
 
 % which subjects data to analyze
-subjects = ["ABC", "HL","MR", "KZ", "CR", "ET", "RJE"]; %"ABC", "HL","MR", "KB", "KZ", "CR", "ET"
-stims = "_Ctruncnatural";
+subjects = ["ABC", "HL","MR", "KZ", "CR", "ET"]; %"ABC", "HL","MR", "KB", "KZ", "CR", "ET"
+stims = "_natural";
 
 % plot individual thresholds
 include_individuals = 1;
@@ -50,14 +50,14 @@ for s  = 1:length(subjects)
         num_subj = num_subj+1;
         % is it a control stim
         if contains(stims, 'C')
-            control = 1;
+            weber_control = 1;
             if contains(stims, 'trunc')
                 scramble = 1;
             else
                 scramble = 0;
             end
         else
-            control = 0;
+            weber_control = 0;
         end
         
         t = 1;
@@ -85,7 +85,7 @@ for s  = 1:length(subjects)
             deviation = data(c).steps(:,1,1) - data(c).steps(:,end,1);
             unit_deviation = [deviation/norm(deviation);0];
             
-            if control && mod(data(c).block, 2) && ~scramble
+            if weber_control && mod(data(c).block, 2) && ~scramble
                 unit_deviation(1) = -unit_deviation(1);
             end
             cosTheta = unit_base'*unit_deviation;
@@ -171,7 +171,7 @@ end
 
 avg = mean(thresholds);
 %save averages to do ttest
-if control
+if weber_control
     thresholds_control = thresholds;
 else
     thresholds_full = thresholds;
@@ -203,10 +203,22 @@ for ii = 1:n_conditions
     end
 end
 
+if weber_control
+    vthresh_control = velocity_thresh;
+    v_sem_high_control = velocity_sem_high;
+    v_sem_low_control = velocity_sem_low;
+    vthreshs_control = velocity_thresholds;
+else
+    vthresh_full = velocity_thresh;
+    v_sem_high_full = velocity_sem_high;
+    v_sem_low_full = velocity_sem_low;
+    vthreshs_full = velocity_thresholds;
+end
+
 
 %plot boudnary
 
-if control
+if weber_control
     colors = [[.5 .5 .5];[.8 .8 .8]];
 %     if scramble
 %         colors = [[.8 .5 .5];[.9 .6 .6]];
@@ -248,7 +260,7 @@ hold on, plot([velocity_thresh(1,:) velocity_thresh(1,1)],-[velocity_thresh(2,:)
 
 if include_individuals
     c = [];
-    if control
+    if weber_control
         color = grays;
     else
         color = blues;
@@ -267,7 +279,7 @@ end
 % plot base velocity
 hold on, quiver(0, 0, data(cond_idx(2)).steps(1,end,1), -data(cond_idx(2)).steps(2,end,1), 'Color', 'k','LineWidth', 2,'AutoScaleFactor',1)
 % % plot constraint line
-if ~control
+if ~weber_control
     hold on, plot(data(cond_idx(2)).velocity_range(1,:,1), -data(cond_idx(2)).velocity_range(2,:,1), 'color', [.5 .5 .5], 'linewidth', 2)
 end
 
@@ -279,6 +291,7 @@ base = norm(base_velocity);
 
 normalized = figure;
 
+
 % plot SEMs
 hold on, fill([velocity_sem_high(1,:) velocity_sem_high(1,1)]./base,-[velocity_sem_high(2,:) velocity_sem_high(2,1)]./base, colors(2,:), 'LineStyle','none', 'FaceAlpha',0.5)
 hold on, fill([velocity_sem_low(1,:) velocity_sem_low(1,1)]./base,-[velocity_sem_low(2,:) velocity_sem_low(2,1)]./base, 'w', 'LineStyle','none')
@@ -288,7 +301,7 @@ hold on, plot([velocity_thresh(1,:) velocity_thresh(1,1)]./base,-[velocity_thres
 
 if include_individuals
     c = [];
-    if control
+    if weber_control
         color = grays;
     else
         color = blues;
@@ -307,7 +320,7 @@ end
 % plot base velocity
 hold on, quiver(0, 0, data(cond_idx(2)).steps(1,end,1)./base, -data(cond_idx(2)).steps(2,end,1)./base, 'Color', 'k','LineWidth', 2,'AutoScaleFactor',1)
 % % plot constraint line
-if ~control
+if ~weber_control
     hold on, plot(data(cond_idx(2)).velocity_range(1,:,1)./base, -data(cond_idx(2)).velocity_range(2,:,1)./base, 'color', [.5 .5 .5], 'linewidth', 2)
 end
 
@@ -324,16 +337,76 @@ avg_full = mean(thresholds_full);
 std_full = std(thresholds_full);
 
 figure
-hold on,errorbar(sorted_unique_deltaAngles, avg_control, std_control,  'color',[.5 .5 .5], 'linewidth', 2)
-hold on, errorbar(sorted_unique_deltaAngles, avg_full, std_full,  'color',[.2 .2 .7], 'linewidth', 2)
+hold on, errorbar(sorted_unique_deltaAngles, avg_control, std_control, 'color',[.5 .5 .5], 'linewidth', 2)
+hold on, errorbar(sorted_unique_deltaAngles, avg_full, std_full, 'color',[.2 .2 .7], 'linewidth', 2)
 hold on, scatter(sorted_unique_deltaAngles(constraint), [1 1], 100,'r', 'filled')
-
+xticks(sorted_unique_deltaAngles)
 % ttest
 [h, p] = ttest(thresholds_control, thresholds_full);
 h = logical(h);
-hold on, scatter(sorted_unique_deltaAngles(h), [1.5], 100, 'k*')
+hold on, scatter(sorted_unique_deltaAngles(h), ones(1,sum(h))*[1.5], 100, 'k*')
 
 
+xlim([-10, 360])
+
+%% plot thresh as angle vs %speed
+% calculate % speed
+weber_full = (vecnorm(vthresh_full)-base)./base;
+percent_full = vecnorm(vthresh_full)./base;
+std_low_full = vecnorm(v_sem_low_full)./base;
+std_high_full = vecnorm(v_sem_high_full)./base;
+
+weber_control = (vecnorm(vthresh_control)-base)./base;
+percent_control = vecnorm(vthresh_control)./base;
+std_low_control = vecnorm(v_sem_low_control)./base;
+std_high_control = vecnorm(v_sem_high_control)./base;
+
+figure
+hold on, plot(sorted_unique_deltaAngles,weber_full, 'color',[.2 .2 .7], 'linewidth', 2)
+hold on, plot(sorted_unique_deltaAngles,weber_control, 'color',[.5 .5 .5], 'linewidth', 2)
+xticks(sorted_unique_deltaAngles)
+title('weber fraction')
+xlim([-10, 360])
+
+% figure
+% hold on, errorbar(sorted_unique_deltaAngles,full, std_low_full, std_high_full)
+% hold on, errorbar(sorted_unique_deltaAngles,control, std_low_control, std_high_control)
+% xticks(sorted_unique_deltaAngles)
+
+
+%% thresh angle vs delta angle
+control_angle = rad2deg(acos(vthresh_control'*base_velocity./(vecnorm(vthresh_control)*base)'));
+full_angle = rad2deg(acos(vthresh_full'*base_velocity./(vecnorm(vthresh_full)*base)'));
+
+
+figure
+hold on, plot(sorted_unique_deltaAngles, control_angle)
+hold on, plot(sorted_unique_deltaAngles, full_angle)
+
+figure
+hold on, scatter(full_angle, weber_full, 100,[.2 .2 .7], 'filled')
+hold on, scatter(control_angle, weber_control, 100,[.5 .5 .5], 'filled')
+
+% calculate tested velocities in terms of change in speed and angle
+all_tested = [];
+for c = 1:10
+    all_tested = [all_tested cond(c).steps(:,1:end-1)];
+end
+d_angle = rad2deg(acos(all_tested'*base_velocity./(vecnorm(all_tested)*base)'));
+weber = (vecnorm(all_tested)-base)./base;
+percent = (vecnorm(all_tested))./base;
+
+hold on, scatter(d_angle, weber, 'k')
+
+xlim([-10, 190])
+ylim([-1.25, 2.25])
+% 
+% figure, scatter(full_angle, percent_full,  100,[.2 .2 .7], 'filled')
+% hold on, scatter(control_angle, percent_control, 100,[.5 .5 .5], 'filled')
+% hold on, scatter(d_angle, percent, 'k')
+
+xlim([-10, 190])
+ylim([-1.25, 2.25])
 %% individual thresholds and confidence intervals
 
 % plot thresholds in velocity space
@@ -358,7 +431,7 @@ end
 
 %plot boudnary with confidence intervals
 
-if control
+if weber_control
     colors = [[.5 .5 .5];[.8 .8 .8]];
 %     if scramble
 %         colors = [[.8 .5 .5];[.9 .6 .6]];
@@ -379,7 +452,7 @@ hold on, plot([velocity_thresh(1,:) velocity_thresh(1,1)],-[velocity_thresh(2,:)
 % plot base velocity
 hold on, quiver(0, 0, data(cond_idx(2)).steps(1,end,1), -data(cond_idx(2)).steps(2,end,1), 'Color', 'k','LineWidth', 2,'AutoScaleFactor',1)
 % % plot constraint line
-if ~control
+if ~weber_control
     hold on, plot(data(cond_idx(2)).velocity_range(1,:,1), -data(cond_idx(2)).velocity_range(2,:,1), 'color', [.5 .5 .5], 'linewidth', 2)
 end
 

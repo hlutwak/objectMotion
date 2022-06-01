@@ -5,13 +5,13 @@ addpath(genpath('/Applications/Psychtoolbox'))
 addpath('/Users/hopelutwak/Documents/MATLAB/VisTools/')
 %% Generate scene
     frame_rate = 85;
-    translation = [0,  0.05, 1.4]/frame_rate;
+    translation = [0,  -0.05, 1.4]/frame_rate;
     depth_structure = 2;
     devPos = [5;3];
     weberFrac = 1;
     view_dist = .35;
-%     displacement = [-.01,-0,0]'/frame_rate;
-%     random_displacements = 1;
+    displacement = [0,0,0]'/frame_rate;
+    random_displacements = 0;
     
 %% Calculate constraint lines for each position
 close all
