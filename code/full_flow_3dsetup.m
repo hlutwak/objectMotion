@@ -5,6 +5,7 @@
 clc;
 addpath(genpath('/Applications/Psychtoolbox'))
 addpath('/Users/hopelutwak/Documents/MATLAB/VisTools/')
+addpath(genpath('/Users/hopelutwak/Desktop/objectMotion'))
 % addpath('/Volvumes/GoogleDrive/My Drive/opticflow/objectDetection/RangeDatabase1080p')
 
 %vvv

@@ -1,3 +1,9 @@
+%% save as eps
+set(gcf,'renderer','painters')
+saveas(gcf, 'depth_map', 'eps')
+
+%% individual data
+
 % Sep 2021
 % aggregate data
 % calculate thresholds and confidence intervals for velocities tested
@@ -13,8 +19,8 @@ dataFolder = '/Users/hopelutwak/Desktop/objectMotion/data';
 S = dir(fullfile(dataFolder,'*.mat'));
 
 % which subject data to analyze
-subject = ["RJE"]; %"ABC", "HL","MR", "KB", "KZ", "CR", "ET"
-stim = "_GP_T1"; % '_GP_T1' '_GP_T2' 'C_natural'  **(T1 = [0 .05 1.4], T2 = [0 .5 1.4])**
+subject = ["CR"]; %"ABC", CR, ET, HL, KZ, MR, RJE
+stim = "_GP_T2"; % '_GP_T1' '_GP_T2' 'C_natural'  **(T1 = [0 .05 1.4], T2 = [0 .5 1.4])**
 
 
 %load appropriate files
@@ -223,7 +229,7 @@ hold on, fill([velocity_CI_low(1,:) velocity_CI_low(1,1)],-[velocity_CI_low(2,:)
 hold on, plot([velocity_thresh(1,:) velocity_thresh(1,1)],-[velocity_thresh(2,:) velocity_thresh(2,1)], 'color',colors(1,:), 'linewidth', 2)
 
 % plot base velocity
-hold on, quiver(0, 0, data(cond_idx(2)).steps(1,end,1), -data(cond_idx(2)).steps(2,end,1), 'Color', 'k','LineWidth', 2,'AutoScaleFactor',1)
+hold on, quiver(0, 0, data(cond_idx(2)).steps(1,end,1), -data(cond_idx(2)).steps(2,end,1), 'Color', 'k','LineWidth', 3,'AutoScaleFactor',1)
 % % plot constraint line
 if ~control
     hold on, plot(data(cond_idx(2)).velocity_range(1,:,1), -data(cond_idx(2)).velocity_range(2,:,1), 'color', [.5 .5 .5], 'linewidth', 2)
@@ -237,14 +243,14 @@ if num_t ==2
     hold on, quiver(0, 0, data(cond_idx(2)).steps(1,end,1), -data(cond_idx(2)).steps(2,end,1), 'Color', 'k','LineWidth', 2,'AutoScaleFactor',0)
     axis equal
 end
-% xlim([-.1, .6])
-% ylim([-.35, .2])
 
-% set(gcf,'renderer','painters')
-% saveas(gcf, 'MRT2', 'eps')
+% xlim([-.2, 1.2]); ylim([-1, .2])
 
-% figure 
-% errorbar
+% xlim([-.1, 1]); ylim([-.4, .8])
+
+xlim([-.45, 1.1]); ylim([-.4, .3])
+
+
 %% normalize by speed of base velocity
 % 
 %calculate delta speed

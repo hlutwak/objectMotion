@@ -5,7 +5,7 @@ addpath(genpath('/Applications/Psychtoolbox'))
 addpath('/Users/hopelutwak/Documents/MATLAB/VisTools/')
 %% Generate scene
     frame_rate = 85;
-    translation = [0,  -0.05, 1.4]/frame_rate;
+    translation = [0,  0, 1.4]/frame_rate;
     depth_structure = 2;
     devPos = [5;3];
     weberFrac = 1;
@@ -64,13 +64,18 @@ c = repmat(d', 1,3);
 
 figure(1)
 scatter(dots_deg(1,:), -dots_deg(2,:),100,c, 'filled')
+axis equal
 
 %find where there's object motion
-
 dev = find(abs(velocity_field(2,:)-(slope.*velocity_field(1,:)+intercept))>10^-6);
 figure(2)
-quiver(dots_screen(1,:), -dots_screen(2,:), velocity_field(1,:), -velocity_field(2,:), 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
+% quiver(dots_screen(1,:), -dots_screen(2,:), velocity_field(1,:), -velocity_field(2,:), 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
+for ii = 1:length(velocity_field)
+    hold on
+    plot([0, velocity_field(1,ii)]+dots_screen(1,ii), -[0, velocity_field(2,ii)]-dots_screen(2,ii), 'k-', 'LineWidth', 2)
+end
 hold on, scatter(dots_screen(1,dev), -dots_screen(2,dev), 100)
+
 % set(gcf,'renderer','Painters'), saveas(gcf, 'deviations','eps')
 % hold on, scatter(dots_screen(1,:), -dots_screen(2,:),100,c, 'filled') 
 
@@ -86,7 +91,18 @@ hold on, scatter(dots_screen(1,dev), -dots_screen(2,dev), 100)
 %     theta(v) = acosd(dot(unit_deg(:,v), unit_screen(:,v)));
 % end
 
-    
+% plot constraint as well
+hold on
+for ii = 1:length(velocity_field)
+    plot([plane_field_screen(1,ii), plane_field_screen2(1,ii)]+dots_screen(1,ii), -[plane_field_screen(2,ii), plane_field_screen2(2,ii)]-dots_screen(2,ii), 'b-')
+end
+
+%% constraint line following object
+[velocity_field, dots_deg, dev1, dots_m, dots_m_next,z0, gazeRotation, displacements] = get_velocity_field_frames(translation, depth_structure, devPos, displacement,random_displacements,view_dist);
+
+figure, scatter3(dots_m(1,:), dots_m(2,:), dots_m(3,:))
+hold on, scatter3(dots_m_next(1,:), dots_m_next(2,:), dots_m_next(3,:))
+
     
 %% plot constraint lines
 segment_begin = plane_field_screen+ dots_screen;

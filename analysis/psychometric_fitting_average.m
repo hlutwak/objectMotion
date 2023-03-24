@@ -6,20 +6,21 @@
 
 % add psignifit toolbox
 addpath('/Users/hopelutwak/Documents/MATLAB/psignifit')
-addpath('/Volumes/GoogleDrive/My Drive/opticflow/objectDetection/OpticFlow/phaseExperiment/data')
+addpath('/Users/hopelutwak/Desktop/objectMotion')
+addpath(genpath('/Users/hopelutwak/Desktop/objectMotion'))
 
 % assign data folder
-dataFolder = '/Volumes/GoogleDrive/My Drive/opticflow/objectDetection/OpticFlow/phaseExperiment/data';
+dataFolder = '/Users/hopelutwak/Desktop/objectMotion/data';
 
 % names of files
 S = dir(fullfile(dataFolder,'*.mat'));
 
 % which subjects data to analyze
-subjects = ["ABC", "HL","MR", "KZ", "CR", "ET"]; %"ABC", "HL","MR", "KB", "KZ", "CR", "ET"
-stims = "_natural";
+subjects = ["ABC", "HL","MR", "KZ", "CR", "ET", "RJE"]; %"ABC", "HL","MR", "KB", "KZ", "CR", "ET"
+stims = "_Ctruncnatural";
 
 % plot individual thresholds
-include_individuals = 1;
+include_individuals = 0;
 
 % loop over all subjects
 figure
@@ -277,7 +278,7 @@ if include_individuals
 end
 
 % plot base velocity
-hold on, quiver(0, 0, data(cond_idx(2)).steps(1,end,1), -data(cond_idx(2)).steps(2,end,1), 'Color', 'k','LineWidth', 2,'AutoScaleFactor',1)
+hold on, quiver(0, 0, data(cond_idx(2)).steps(1,end,1), -data(cond_idx(2)).steps(2,end,1), 'Color', 'k','LineWidth', 3,'AutoScaleFactor',1)
 % % plot constraint line
 if ~weber_control
     hold on, plot(data(cond_idx(2)).velocity_range(1,:,1), -data(cond_idx(2)).velocity_range(2,:,1), 'color', [.5 .5 .5], 'linewidth', 2)
@@ -285,46 +286,53 @@ end
 
 axis equal
 
-% normalized thresholds
+% xlim([-.2, 1.2]); ylim([-1, .2])
+
+% xlim([-.1, 1]); ylim([-.4, .8])
+
+xlim([-.45, 1.1]); ylim([-.4, .3])
+
+% 
+% % normalized thresholds
 base_velocity = data(cond_idx(2)).steps(:,end,1);
 base = norm(base_velocity);
-
-normalized = figure;
-
-
-% plot SEMs
-hold on, fill([velocity_sem_high(1,:) velocity_sem_high(1,1)]./base,-[velocity_sem_high(2,:) velocity_sem_high(2,1)]./base, colors(2,:), 'LineStyle','none', 'FaceAlpha',0.5)
-hold on, fill([velocity_sem_low(1,:) velocity_sem_low(1,1)]./base,-[velocity_sem_low(2,:) velocity_sem_low(2,1)]./base, 'w', 'LineStyle','none')
-
-% plot thresholds
-hold on, plot([velocity_thresh(1,:) velocity_thresh(1,1)]./base,-[velocity_thresh(2,:) velocity_thresh(2,1)]./base, 'color',colors(1,:), 'linewidth', 2)
-
-if include_individuals
-    c = [];
-    if weber_control
-        color = grays;
-    else
-        color = blues;
-    end
-    for s = 1:length(subjects)
-        for conds = 1:n_conditions
-            c = [c; color(s,:)];
-        end
-    end
-    
-    individuals = reshape(velocity_thresholds, 2, length(subjects)*n_conditions);
-    hold on, scatter(individuals(1,:)./base, -individuals(2,:)./base, [],c,'filled')
-        
-end
-
-% plot base velocity
-hold on, quiver(0, 0, data(cond_idx(2)).steps(1,end,1)./base, -data(cond_idx(2)).steps(2,end,1)./base, 'Color', 'k','LineWidth', 2,'AutoScaleFactor',1)
-% % plot constraint line
-if ~weber_control
-    hold on, plot(data(cond_idx(2)).velocity_range(1,:,1)./base, -data(cond_idx(2)).velocity_range(2,:,1)./base, 'color', [.5 .5 .5], 'linewidth', 2)
-end
-
-axis equal
+% 
+% normalized = figure;
+% 
+% 
+% % plot SEMs
+% hold on, fill([velocity_sem_high(1,:) velocity_sem_high(1,1)]./base,-[velocity_sem_high(2,:) velocity_sem_high(2,1)]./base, colors(2,:), 'LineStyle','none', 'FaceAlpha',0.5)
+% hold on, fill([velocity_sem_low(1,:) velocity_sem_low(1,1)]./base,-[velocity_sem_low(2,:) velocity_sem_low(2,1)]./base, 'w', 'LineStyle','none')
+% 
+% % plot thresholds
+% hold on, plot([velocity_thresh(1,:) velocity_thresh(1,1)]./base,-[velocity_thresh(2,:) velocity_thresh(2,1)]./base, 'color',colors(1,:), 'linewidth', 2)
+% 
+% if include_individuals
+%     c = [];
+%     if weber_control
+%         color = grays;
+%     else
+%         color = blues;
+%     end
+%     for s = 1:length(subjects)
+%         for conds = 1:n_conditions
+%             c = [c; color(s,:)];
+%         end
+%     end
+%     
+%     individuals = reshape(velocity_thresholds, 2, length(subjects)*n_conditions);
+%     hold on, scatter(individuals(1,:)./base, -individuals(2,:)./base, [],c,'filled')
+%         
+% end
+% 
+% % plot base velocity
+% hold on, quiver(0, 0, data(cond_idx(2)).steps(1,end,1)./base, -data(cond_idx(2)).steps(2,end,1)./base, 'Color', 'k','LineWidth', 2,'AutoScaleFactor',1)
+% % % plot constraint line
+% if ~weber_control
+%     hold on, plot(data(cond_idx(2)).velocity_range(1,:,1)./base, -data(cond_idx(2)).velocity_range(2,:,1)./base, 'color', [.5 .5 .5], 'linewidth', 2)
+% end
+% 
+% axis equal
 
 %% plot thresholds angle vs step
 
