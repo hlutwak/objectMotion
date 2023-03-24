@@ -19,8 +19,13 @@ dataFolder = '/Users/hopelutwak/Desktop/objectMotion/data';
 S = dir(fullfile(dataFolder,'*.mat'));
 
 % which subject data to analyze
+<<<<<<< HEAD
 subject = ["CR"]; %"ABC", CR, ET, HL, KZ, MR, RJE
 stim = "_GP_T2"; % '_GP_T1' '_GP_T2' 'C_natural'  **(T1 = [0 .05 1.4], T2 = [0 .5 1.4])**
+=======
+subject = ["RJE"]; %"ABC", "HL","MR", "KB", "KZ", "CR", "ET"
+stim = "_Ctruncnatural"; % '_GP_T1' '_GP_T2' 'C_natural'  **(T1 = [0 .05 1.4], T2 = [0 .5 1.4])**
+>>>>>>> 99820cafc882646be896276a4ef07484151d06ff
 
 
 %load appropriate files
