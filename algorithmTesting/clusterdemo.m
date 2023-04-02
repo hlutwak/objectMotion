@@ -114,7 +114,7 @@ gray=round((white+black)/2);
 PsychImaging('PrepareConfiguration');
 PsychImaging('AddTask', 'General', 'NormalizedHighresColorRange', 1);
 % Open an on screen window and color it black
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber, 0);
+[window, windowRect] = PsychImaging('OpenWindow', screenNumber, 0, [0 0 720 450]);
 Screen('BlendFunction', window, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 screen_rect = Screen('Rect',window);
 
