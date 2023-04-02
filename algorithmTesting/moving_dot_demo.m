@@ -1,22 +1,26 @@
 addpath(genpath('/Applications/Psychtoolbox')) % add psychtoolbox to your path
 
-visualize = 0; %turn figures on or off
+visualize = 1; %turn figures on or off
 
 seed=2;
 rng(seed) % to have random dots that appear in the same "random" place each time
 ns = 2; % number of seconds
 speed = 1; % m/s speed of the observer in a straight line
-fps = 60; % frames per second
+fps =Screen(0,'FrameRate');
 height = 1;
 % gaze_angle = 15;
 fixation = 3;
+speeds = 0.01:0.01:0.05; %speeds m/s
+s = 5;
+directions = pi/3:pi/3:2*pi;
+d = 6;
 
 dim = [6,0,6]; % extent of where dots can be in m: X, Y, Z. Depth is more than how far you're travelling (ns *speed) + a little extra 
 % 5 m across
 nClusters = 500; % specify number of clusters
 nDotsPerCluster = 2;% number of dots per cluster
 
-viewdist = .1; %m how far the screen is from the observer
+viewdist = .25; %m how far the screen is from the observer
 viewingdepths = [.5,   15]; % nearest and furthest dots that can show up, m
 
 windowRect = [0           0        1920        1080]; % screen size in pixels (origin, width of screen, height of screen)
@@ -26,17 +30,20 @@ screensize = [.712 .312]; % screen size in m
 ppcm = [39,39]; % pixel per cm of the screen
 xyrat = windowRect(3)/windowRect(4);
 
-nDots = nDotsPerCluster*nClusters+1; % total numbber of dots
+nDots = nDotsPerCluster*nClusters+3; % total numbber of dots
 clusters = rand(nClusters,3).*dim - [.5*dim(1), -height, 0]; % randomize position of dots, centered around x = 0, and ground pushed down
 
 dots = repmat(clusters,nDotsPerCluster,1);
 fixation_dot = [0, height, dim(3)/2];
-dots(end+1,:) = fixation_dot;
+stationary_dot = [0.5, height, dim(3)/2];
+target_dot = [-0.5, height, dim(3)/2];
+dots(end+1:end+3,:) = [fixation_dot; stationary_dot; target_dot];
+
 % visualize dots, orient so that Z axis extends from observer to direction
 % of gaze
 if visualize
     figure(1), scatter3(dots(:,3), dots(:,1), -dots(:,2), 'filled')
-    hold on, scatter3(dots(end,3), dots(end,1), -dots(end,2), 'filled', 'r')
+    hold on, scatter3(dots(end-2,3), dots(end-2,1), -dots(end-2,2), 'filled', 'r')
 
     xlabel('Z')
     ylabel('X')
@@ -56,22 +63,25 @@ end
 % speed/fps defines how far to go over each frame 
 trajectory = [zeros(ns*fps+1,1), zeros(ns*fps+1,1),(0:(speed/fps):(ns*speed))'];
 % trajectory = [zeros(ns*fps+1,1), 0.2*sin(0:(speed/fps):(ns*speed))', (0:(speed/fps):(ns*speed))'];
+target_trajectory = [speeds(s)*cos(directions(d))*(0:1/fps:ns)', zeros(ns*fps+1,1), speeds(s)*sin(directions(d))*(0:1/fps:ns)'];
+target_trajectory = target_trajectory + target_dot;
 
 % rotation
-s = 0:1/fps:ns;
-theta = atan(height./(fixation-speed*s));
+secs = 0:1/fps:ns;
+theta = atan(height./(fixation-speed*secs));
 % theta = zeros(size(s))+deg2rad(5);
 
 % visualize observer trajectory within dots
 if visualize
     figure(1), hold on, plot3(trajectory(:,3), trajectory(:,1), -trajectory(:,2), 'LineWidth', 3)
-    legend('dots', 'trajectory')
+    hold on, plot3(target_trajectory(:,3), target_trajectory(:,1), -target_trajectory(:,2), 'LineWidth', 2)
+    legend('dots', 'trajectory', 'moving object')
     title('environment and observer trajectory')
 end
 
 % calculate velocity between frames
 v = diff(trajectory);
-
+v_target = diff(target_trajectory);
 
 % holder matrices for screen positions
 x = nan(nDots,ns*fps);
@@ -81,10 +91,13 @@ I = true(nDots,ns*fps);
 drawndots = NaN([size(dots) ns*fps]);
 for ii=1:ns*fps % 
     velocity = v(ii,:); % how much did the observer move
+    t_vel = v_target(ii,:);
     % moving observer = moving world relative to observer in equal and opposite way
     % recalculating world coordinates in terms of observer reference frame,
     % where observer is always at the origin, not including rotation
     dots = dots - velocity; 
+    dots(end,:) = dots(end,:)-t_vel;
+
     % if the observer rotates, rotate the world based on 3D rotation matrix
     observerRotation = [1, 0, 0; 0, cos(theta(ii)), -sin(theta(ii)); 0, sin(theta(ii)), cos(theta(ii))];
     drawndots(:,:,ii) = (observerRotation*dots')';
@@ -108,7 +121,9 @@ end
 % visualize first frame in pixels
 if visualize
     figure, scatter(x(I(:,1),1)*ppcm(1), -y(I(:,1),1)*ppcm(2), 'filled')
-    hold on, scatter(x(end,1)*ppcm(1), -y(end,1)*ppcm(2), 'filled', 'r')
+    hold on, scatter(x(end-2,1)*ppcm(1), -y(end-2,1)*ppcm(2), 'filled', 'r') %fixation
+    hold on, scatter(x(end-1,1)*ppcm(1), -y(end-1,1)*ppcm(2), 'filled', 'b') %stationary
+    hold on, scatter(x(end,1)*ppcm(1), -y(end,1)*ppcm(2), 'filled', 'g') %target
     xlim([-windowRect(3)/2, windowRect(3)/2])
     ylim([-windowRect(4)/2, windowRect(4)/2])
     axis equal
@@ -185,15 +200,15 @@ for ii = 1:ns*fps-1
     xlim([-30,30])
     ylim([-20,20])
 
-    pause(1/30)
+    pause(1/fps)
 end
 
 
-figure
-for ii = 1:ns*fps-1
-    scatter3(drawndots(:,1,ii), drawndots(:,2,ii), drawndots(:,3,ii))
-    xlim([-6,6])
-    ylim([-5,5])
-    zlim([-10,10])
-    pause(1/30)
-end
+% figure
+% for ii = 1:ns*fps-1
+%     scatter3(drawndots(:,1,ii), drawndots(:,2,ii), drawndots(:,3,ii))
+%     xlim([-6,6])
+%     ylim([-5,5])
+%     zlim([-10,10])
+%     pause(1/30)
+% end
