@@ -7,7 +7,7 @@ function [velocity_field] = constraint_velocity_screen(Z, xy, translate, view_di
 % XYZ is the XYZ position (in m) of the locations where we are measuring
 % the speed.
 %
-% centers_deg is the x,y positions of the gabors on the screen (in deg).
+% xy is the x,y positions of the dots on the screen (in m).
 %
 % translate tells you the observer's translation speed (Vx, Vy, Vz) in
 % m/sec.
@@ -49,7 +49,7 @@ for ii=1:length(Z)
 %         B = [(x*y)/f -(f+x^2/f) y; f+y^2/f -(x*y)/f -x];
         B = [f+x^2/f x*y/f 0; x*y/f f+y^2/f 0];
 %         z0 = f;
-%         velocity_field1(1:2,i) = Pxy*A*translate'+B*rotate';
+%         velocity_field1(1:2,ii) = Pxy*A*translate'+B*rotate';
         velocity_field(1:2,ii) = (z0*Pxy*A+B)*translate'/z0;
 end
 
