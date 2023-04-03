@@ -20,7 +20,7 @@ dim = [6,0,6]; % extent of where dots can be in m: X, Y, Z. Depth is more than h
 nClusters = 500; % specify number of clusters
 nDotsPerCluster = 2;% number of dots per cluster
 
-viewdist = .25; %m how far the screen is from the observer
+view_dist = .25; %m how far the screen is from the observer
 viewingdepths = [.5,   15]; % nearest and furthest dots that can show up, m
 
 windowRect = [0           0        1920        1080]; % screen size in pixels (origin, width of screen, height of screen)
@@ -82,10 +82,13 @@ end
 % calculate velocity between frames
 v = diff(trajectory);
 v_target = diff(target_trajectory);
+T = NaN(size(v));
+v_constraint = nan(2,nDots,ns*fps);
 
 % holder matrices for screen positions
 x = nan(nDots,ns*fps);
 y = nan(nDots,ns*fps);
+Z = nan(nDots,ns*fps);
 I = true(nDots,ns*fps);
 
 drawndots = NaN([size(dots) ns*fps]);
@@ -101,17 +104,24 @@ for ii=1:ns*fps %
     % if the observer rotates, rotate the world based on 3D rotation matrix
     observerRotation = [1, 0, 0; 0, cos(theta(ii)), -sin(theta(ii)); 0, sin(theta(ii)), cos(theta(ii))];
     drawndots(:,:,ii) = (observerRotation*dots')';
-
+    
+    %for calculating velocity based on constraint equation
+    Z(:,ii) = vecnorm(drawndots(:,:,ii), 2, 2); %ray trace depths
+    T(ii,:) = (-observerRotation*velocity')'; %rotate velocity vector by inverse observer rotation
+    
     % Using projective geometry (similar triangles) to calculate where on
     % the screen the dots should appear
 
     % x = x coordinate on screen, y = y coordinate on screen, convert to cm
-    x(:,ii) = 100*viewdist*(drawndots(:,1,ii))./(drawndots(:,3,ii));
-    y(:,ii) = 100*viewdist*(drawndots(:,2,ii))./(drawndots(:,3,ii));
+    x(:,ii) = 100*view_dist*(drawndots(:,1,ii))./(drawndots(:,3,ii));
+    y(:,ii) = 100*view_dist*(drawndots(:,2,ii))./(drawndots(:,3,ii));
+    
+    % calculate velocity based on constraint eq
+    v_constraint(:,:,ii) = constraint_velocity_screen(Z(:,ii), [x(:,ii)';y(:,ii)'], T(ii,:), view_dist,Z(end-2,ii));
 
     % Indices of dots to show based on how close/far the dots in the real world are (viewing depths)
-    I(:,ii) = drawndots(:,3) > viewingdepths(1)...
-        & drawndots(:,3)< viewingdepths(2);
+    I(:,ii) = drawndots(:,3,ii) > viewingdepths(1)...
+        & drawndots(:,3,ii)< viewingdepths(2);
     % and the screensize
     I(:,ii) = I(:,ii) & abs(x(:,ii)*ppcm(1))<windowRect(3)/2 & abs(y(:,ii)*ppcm(2))<windowRect(4)/2;
 
@@ -181,7 +191,8 @@ for ii=1:ns*fps
     % size, color, center of the screen, 2 = draw round dots with
     % anti-aliasing
     Screen('DrawDots', window, xy, 10 ,[1,1,1] ,ctr, 2);
-    Screen('DrawDots', window, xy(:,end), 10 ,[1,0,0] ,ctr, 2);
+    Screen('DrawDots', window, xy(:,end), 10 ,[0,1,0] ,ctr, 2);
+    Screen('DrawDots', window, xy(:,end-2), 10 ,[1,0,0] ,ctr, 2);
 
     vbl = Screen('Flip',window);
     
@@ -203,12 +214,23 @@ for ii = 1:ns*fps-1
     pause(1/fps)
 end
 
+v_constraint(:,:,end) = [];
+figure
+for ii = 1:ns*fps-1
+    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
+    xlim([-30,30])
+    ylim([-20,20])
 
-% figure
-% for ii = 1:ns*fps-1
-%     scatter3(drawndots(:,1,ii), drawndots(:,2,ii), drawndots(:,3,ii))
-%     xlim([-6,6])
-%     ylim([-5,5])
-%     zlim([-10,10])
-%     pause(1/30)
-% end
+    pause(1/fps)
+end
+
+% calculate constraint line for each moment
+
+%plot eye centered trajectory, T
+figure
+for ii = 1:ns*fps-1
+    quiver(0, 0, T(ii,2), T(ii,3))
+    xlim([0,.05])
+    ylim([-.05,0])
+    pause(1/fps)
+end
