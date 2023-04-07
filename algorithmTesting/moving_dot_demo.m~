@@ -15,10 +15,9 @@ height = .5;
 % gaze_angle = 15;
 fixation = 3;
 speeds = 0.02:0.02:0.1; %speeds m/s, for target
-speeds = 0.02;
 s = 1;
 directions = pi/3:pi/3:2*pi;
-d = 5;
+d = ;
 
 dim = [6,0,6]; % extent of where dots can be in m: X, Y, Z. Depth is more than how far you're travelling (ns *speed) + a little extra 
 % 5 m across
@@ -124,9 +123,6 @@ for ii=1:ns*fps %
     % calculate velocity based on constraint eq, make sure x,y in m
     v_constraint(:,:,ii) = constraint_velocity_screen(Z(:,ii), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(end-2,ii));
     v_constraint(:,:,ii) = v_constraint(:,:,ii).*100;
-    v_constraint_far(:,:,ii) = constraint_velocity_screen(Z(:,ii)+1, [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(end-2,ii));
-    v_constraint_far(:,:,ii) = v_constraint_far(:,:,ii)*100;
-    
     % Indices of dots to show based on how close/far the dots in the real world are (viewing depths)
     I(:,ii) = drawndots(:,3,ii) > viewingdepths(1)...
         & drawndots(:,3,ii)< viewingdepths(2);
@@ -136,8 +132,6 @@ for ii=1:ns*fps %
     
 end
 
-rvelocityX = diff(x,1,2);
-rvelocityY = diff(y,1,2);
 
 % visualize first frame in pixels
 if visualize
@@ -202,7 +196,7 @@ for ii=1:ns*fps
     % size, color, center of the screen, 2 = draw round dots with
     % anti-aliasing
     Screen('DrawDots', window, xy, 10 ,[1,1,1] ,ctr, 2);
-%     Screen('DrawDots', window, xy(:,end), 10 ,[0,1,0] ,ctr, 2);
+    Screen('DrawDots', window, xy(:,end), 10 ,[0,1,0] ,ctr, 2);
     Screen('DrawDots', window, xy(:,end-2), 10 ,[1,0,0] ,ctr, 2);
 
     vbl = Screen('Flip',window);
@@ -213,6 +207,9 @@ sca;
 
 
 %% plot velocities
+rvelocityX = diff(x,1,2);
+rvelocityY = diff(y,1,2);
+
 figure
 for ii = 1:ns*fps-1
     quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
@@ -224,17 +221,11 @@ for ii = 1:ns*fps-1
 end
 
 figure
-ii = ns*fps-2;
-scatter(x(I(:,ii),ii), -y(I(:,ii),ii), 20,'k', 'filled');
-hold on,    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [0, 0, .5], 'AutoScale','off', 'LineWidth', 2), axis equal
-
-hold on,    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint_far(1,I(:,ii),ii)', -v_constraint_far(2,I(:,ii),ii)', 'color', [.5, 0, 0], 'AutoScale','off', 'LineWidth', 2), axis equal
-
+ii = 1;
+scatter(x(I(:,ii),ii), -y(I(:,ii),ii), 10,'k', 'filled');
 hold on, quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [.25, .25, .25], 'AutoScale','off', 'LineWidth', 2), axis equal
-
-ii = ns*fps-1;
-hold on, scatter(x(I(:,ii),ii), -y(I(:,ii),ii),20, 'b', 'filled');
-    hold on, scatter(x(end,ii), -y(end,ii), 10,'c', 'filled');
+ii = 2;
+hold on, scatter(x(I(:,ii),ii), -y(I(:,ii),ii),10, 'b', 'filled');
 
 
 figure
@@ -248,34 +239,25 @@ end
 
  
 % look at difference between screen velocity and constraint velocity
-% label moving object in red
+d = vecnorm(v_constraint(:,:,1)'- [rvelocityX(:,1) rvelocityY(:,1)],2,2);
+figure, histogram(d(I(:,1)))
+[val, idx] = max(d(I(:,1)));
+
 figure
 for ii = 1:ns*fps-1 %ns*fps-1
-    % getting distance to constraint segment
-%     vec = v_constraint(:,:,ii)'- v_constraint_far(:,:,ii)'; %vector between close and far velocities
-%     slope = vec(:,2)./vec(:,1); 
-%     intercept = v_constraint(2,:,ii)' - slope.*v_constraint(1,:,ii)'; %intercept = y-slope*x
-%     
-    % P1 = (x1, y1) = v_constraint, P2 =(x2,y2) = v_constraint_far, P0 =
-    % (x0,y0) = rvelocityX, rvelocityY
-    a = (v_constraint_far(1,:,ii)-v_constraint(1,:,ii)).*(v_constraint(2,:,ii)-rvelocityY(:,ii)');
-    b = (v_constraint(1,:,ii)-rvelocityX(:,ii)').*(v_constraint_far(2,:,ii)-v_constraint(2,:,ii));
-    c = sqrt((v_constraint_far(1,:,ii) - v_constraint(1,:,ii)).^2 + (v_constraint_far(2,:,ii) - v_constraint(2,:,ii)).^2);
-    d = (abs(a-b)./c)';
-%     d = vecnorm((v_constraint(:,:,ii)'- [rvelocityX(:,ii) rvelocityY(:,ii)])')';
+    d = vecnorm((v_constraint(:,:,ii)'- [rvelocityX(:,ii) rvelocityY(:,ii)])')';
     val = max(d(I(:,ii)));
     idx = find(d == val);
 %     scatter(d(end), val)
 %     xlim([0,0.25]);
 %     pause(1/fps*2)
     
-    clf
+
     quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
     hold on, quiver(x(idx,ii), -y(idx,ii), v_constraint(1,idx,ii)', -v_constraint(2,idx,ii)', 'color', [1,0,0], 'AutoScale', 1, 'LineWidth', 2), axis equal
     hold on, scatter(x(idx,ii), -y(idx,ii), 10,'r', 'filled');
-    text(x(idx, ii), -y(idx, ii), num2str(val))
     xlim([-15,15])
     ylim([-10,10])
     pause(1/fps)
-    
+    clf
 end

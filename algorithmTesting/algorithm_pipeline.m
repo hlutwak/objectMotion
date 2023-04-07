@@ -30,8 +30,7 @@ plane_field_screen2 = calculate_cloud_flow_screen(ones(1, length(dots_deg))*1000
 difference = plane_field_screen2-plane_field_screen;
 slope = difference(2,:)./difference(1,:); % get slope of each constraint line
 intercept = plane_field_screen(2,:)-slope.*plane_field_screen(1,:); % get intercept of each constraint line
-
-
+ 
 
 % d = abs(velocity_field(2,:)-(slope.*velocity_field(1,:)+intercept));
 x1 = plane_field_screen(1,:);
