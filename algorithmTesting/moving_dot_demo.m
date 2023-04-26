@@ -18,7 +18,7 @@ speeds = 0.02:0.02:0.1; %speeds m/s, for target
 speeds = 0.1;
 s = 1;
 directions = pi/3:pi/3:2*pi;
-d = 6;
+d = 5;
  
 dim = [6,0,6]; % extent of where dots can be in m: X, Y, Z. Depth is more than how far you're travelling (ns *speed) + a little extra 
 % 5 m across
@@ -340,30 +340,54 @@ quiver(degX(I(:,ii),ii), -degY(I(:,ii),ii),rvXdeg(I(:,ii),ii), -rvYdeg(I(:,ii),i
     ylim([-30,30])
     axis equal
     
-% get target window
-% for ii = 1
-target_center = [mean([max(x(target_idx,ii)),min(x(target_idx,ii))]), mean([max(y(target_idx,ii)),min(y(target_idx,ii))])];
-distance2target_center = vecnorm((target_center - [x(:,ii),y(:,ii)])');
-radius = 3; % in cm
-window_idx = find(distance2target_center<radius);
-% plot window on object
-hold on, scatter(x(window_idx,ii), -y(window_idx,ii), 50,'g')
+%% show target vs surround velocities throughout stim
+radius = 3; %in cm
+center = target_idx;
+xlims = [-.05, .05];
+ylims = [-.025,.025];
 
-% find non target velocities
-surround_idx = window_idx(~ismember(window_idx, target_idx));
-hold on, scatter(x(surround_idx,ii), -y(surround_idx,ii), 50,"yellow")
-   
-% plot suround velocities
+
 figure
-quiver(zeros(size(rvelocityX(surround_idx,ii))),zeros(size(rvelocityX(surround_idx,ii))), rvelocityX(surround_idx,ii), -rvelocityY(surround_idx,ii), 'AutoScale', 'off', 'LineWidth', 2)
-hold on
-quiver(zeros(size(rvelocityX(target_idx,ii))),zeros(size(rvelocityX(target_idx,ii))), rvelocityX(target_idx,ii), -rvelocityY(target_idx,ii), 'AutoScale', 'off', 'LineWidth', 2)
-axis equal
+set(gcf,'position',[500, 500, 600, 400])
+set(gcf,'color','w');
 
-% get target and surround velocity mean
-mean([rvelocityX(target_idx,ii), rvelocityY(target_idx,ii)])
-mean([rvelocityX(surround_idx,ii), rvelocityY(surround_idx,ii)])
 
+for ii = 1:ns*fps-1
+    clf
+    center_point = [mean([max(x(center,ii)),min(x(center,ii))]), mean([max(y(center,ii)),min(y(center,ii))])];
+    distance2center_point = vecnorm((center_point - [x(:,ii),y(:,ii)])');
+    window_idx = find(distance2center_point<radius);
+    % plot window on object
+    % hold on, scatter(x(window_idx,ii), -y(window_idx,ii), 50,'g')
+    
+    % find non target velocities
+    surround_idx = window_idx(~ismember(window_idx, center));
+    % hold on, scatter(x(surround_idx,ii), -y(surround_idx,ii), 50,"yellow")
+    
+    % get target and surround velocity mean
+    center_mean= mean([rvelocityX(center,ii), rvelocityY(center,ii)]);
+    surround_mean = mean([rvelocityX(surround_idx,ii), rvelocityY(surround_idx,ii)]);
+    
+    % plot suround velocities
+
+    quiver(zeros(size(rvelocityX(surround_idx,ii))),zeros(size(rvelocityX(surround_idx,ii))), rvelocityX(surround_idx,ii), -rvelocityY(surround_idx,ii), 'AutoScale', 'off', 'LineWidth', 2)
+    hold on
+    quiver(zeros(size(rvelocityX(center,ii))),zeros(size(rvelocityX(center,ii))), rvelocityX(center,ii), -rvelocityY(center,ii), 'AutoScale', 'off', 'LineWidth', 2)
+    
+    % plot mean velocity object and surround
+    hold on
+    quiver(0,0, center_mean(1), -center_mean(2), 'r','AutoScale', 'off', 'LineWidth', 5)
+    hold on
+    quiver(0,0,surround_mean(1), -surround_mean(2), 'color',[0,0,0.75],'AutoScale', 'off', 'LineWidth', 5)
+    
+    hold on, plot([v_constraint(1,center(1), ii) v_constraint_far(1,center(1), ii)], -[v_constraint(2,center(2),ii) v_constraint_far(2,center(2),ii)], 'k', 'LineWidth', 2)
+    axis equal
+    xlim(xlims)
+    ylim(ylims)
+    pause(1/fps)
+end
+
+%%
 % get stationary window
 stationary_center = [mean([max(x(stationary_idx,ii)),min(x(stationary_idx,ii))]), mean([max(y(stationary_idx,ii)),min(y(stationary_idx,ii))])];
 distance2target_center = vecnorm((stationary_center - [x(:,ii),y(:,ii)])');
@@ -373,9 +397,13 @@ window_idx = find(distance2target_center<radius);
 hold on, scatter(x(window_idx,ii), -y(window_idx,ii), 50,'b')
 
 % find non stationary velocities
-surround_idx = window_idx(~ismember(window_idx, target_idx));
+surround_idx = window_idx(~ismember(window_idx, stationary_idx));
 hold on, scatter(x(surround_idx,ii), -y(surround_idx,ii), 50,"yellow")
-  
+
+% get target and surround velocity mean
+stationary_mean= mean([rvelocityX(stationary_idx,ii), rvelocityY(stationary_idx,ii)]);
+surround_mean = mean([rvelocityX(surround_idx,ii), rvelocityY(surround_idx,ii)]);
+
 
 % plot suround velocities
 figure
@@ -384,9 +412,12 @@ hold on
 quiver(zeros(size(rvelocityX(stationary_idx,ii))),zeros(size(rvelocityX(stationary_idx,ii))), rvelocityX(stationary_idx,ii), -rvelocityY(stationary_idx,ii), 'AutoScale', 'off', 'LineWidth', 2)
 axis equal
 
-% get target and surround velocity mean
-mean([rvelocityX(stationary_idx,ii), rvelocityY(stationary_idx,ii)])
-mean([rvelocityX(surround_idx,ii), rvelocityY(surround_idx,ii)])
+% plot mean velocity object and surround
+hold on
+quiver(0,0, stationary_mean(1), -stationary_mean(2), 'r','AutoScale', 'off', 'LineWidth', 5)
+hold on
+quiver(0,0,surround_mean(1), -surround_mean(2), 'color',[0,0,0.75],'AutoScale', 'off', 'LineWidth', 5)
 
 
                
+hold on, plot([v_constraint(1,target_idx(1), ii) v_constraint_far(1,target_idx(1), ii)], -[v_constraint(2,target_idx(2),ii) v_constraint_far(2,target_idx(2),ii)], 'k', 'LineWidth', 2)
