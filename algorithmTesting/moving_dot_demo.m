@@ -15,10 +15,10 @@ height = .5;
 % gaze_angle = 15;
 fixation = 3;
 speeds = 0.02:0.02:0.1; %speeds m/s, for target
-speeds = 0.1;
+speeds = 0.5;
 s = 1;
-directions = pi/3:pi/3:2*pi;
-d = 5;
+directions = deg2rad([0, 45, 90, 120,135, 180, 225, 270, 315]) ;
+d = 3;
  
 dim = [6,0,6]; % extent of where dots can be in m: X, Y, Z. Depth is more than how far you're travelling (ns *speed) + a little extra 
 % 5 m across
@@ -48,11 +48,12 @@ object = [.15, .15, .15]; %length, width, height
 dotsperobj = 25;
 a = -0.075;
 b = 0.075;
+aboveground = -.1;
  
 if ~isempty(nObjects)
     for obj = 1:nObjects
         r = (b-a).*rand(dotsperobj,3) + a;
-        newpositions = [r(:,1)+positions(obj,1), r(:,2)+(height-b), r(:,3)+positions(obj,2)];
+        newpositions = [r(:,1)+positions(obj,1), r(:,2)+(aboveground+ height-b), r(:,3)+positions(obj,2)];
         dots = [dots; newpositions];
     end
 end
@@ -62,7 +63,9 @@ dots(end+1,:) = fixation_dot;
 fixation_idx = length(dots);
  
 % stationary and target positions
-stationary_target = [0.5, height-b, dim(3)/2; -0.5, height-b, dim(3)/2];
+aboveground = -.15;
+stationary_target = [0.5, aboveground+height-b, dim(3)/3; -0.5, aboveground+height-b, dim(3)/3];
+% stationary then target
  
 for obj = 1:2 %stationary obj and moving obj
     r = (b-a).*rand(dotsperobj,3) + a;
@@ -135,7 +138,7 @@ for ii=1:ns*fps %
     % recalculating world coordinates in terms of observer reference frame,
     % where observer is always at the origin
     dots = dots - velocity; %shift dots in world coordinates
-    dots(target_idx,:) = dots(target_idx:end,:)-t_vel; %add velocity to moving object
+    dots(target_idx,:) = dots(target_idx:end,:)+t_vel; %add velocity to moving object
  
     % if the observer rotates, rotate the world based on 3D rotation matrix
     observerRotation = [1, 0, 0; 0, cos(theta(ii)), -sin(theta(ii)); 0, sin(theta(ii)), cos(theta(ii))];
@@ -342,8 +345,8 @@ quiver(degX(I(:,ii),ii), -degY(I(:,ii),ii),rvXdeg(I(:,ii),ii), -rvYdeg(I(:,ii),i
     
 %% show target vs surround velocities throughout stim
 radius = 3; %in cm
-center = target_idx;
-xlims = [-.05, .05];
+center = stationary_idx;
+xlims = [-.08, .05];
 ylims = [-.025,.025];
 
 
