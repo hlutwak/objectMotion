@@ -22,7 +22,7 @@ d = 3;
  
 dim = [6,0,6]; % extent of where dots can be in m: X, Y, Z. Depth is more than how far you're travelling (ns *speed) + a little extra 
 % 5 m across
-nClusters = 700; % specify number of clusters
+nClusters = 1000; % specify number of clusters
 nDotsPerCluster = 1;% number of dots per cluster
 nObjects = [];
  
@@ -48,7 +48,7 @@ object = [.15, .15, .15]; %length, width, height
 dotsperobj = 25;
 a = -0.075;
 b = 0.075;
-aboveground = -.1;
+aboveground = 0;%-.1;
  
 if ~isempty(nObjects)
     for obj = 1:nObjects
@@ -283,7 +283,7 @@ end
 % look at difference between screen velocity and constraint velocity
 % label moving object in red
 figure
-set(gcf,'position',[500, 500, 800, 600])
+set(gcf,'position',[250, 250, 800, 600])
 set(gcf,'color','w');
 for ii = 1:ns*fps-1 %ns*fps-1
     clf
@@ -345,7 +345,7 @@ quiver(degX(I(:,ii),ii), -degY(I(:,ii),ii),rvXdeg(I(:,ii),ii), -rvYdeg(I(:,ii),i
     
 %% show target vs surround velocities throughout stim
 radius = 3; %in cm
-center = stationary_idx;
+center = target_idx;
 xlims = [-.08, .05];
 ylims = [-.025,.025];
 
@@ -369,7 +369,7 @@ for ii = 1:ns*fps-1
     
     % get target and surround velocity mean
     center_mean= mean([rvelocityX(center,ii), rvelocityY(center,ii)]);
-    surround_mean = mean([rvelocityX(surround_idx,ii), rvelocityY(surround_idx,ii)]);
+    surround_mean = mean([rvelocityX(surround_idx,ii), rvelocityY(surround_idx,ii)],1);
     
     % plot suround velocities
 
