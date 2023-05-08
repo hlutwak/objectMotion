@@ -1,3 +1,9 @@
+%%
+addpath(genpath('/Users/hopelutwak/Desktop/objectMotion')) % add psychtoolbox to your path
+
+
+%%
+
 addpath(genpath('/Applications/Psychtoolbox')) % add psychtoolbox to your path
 Screen('Preference', 'SkipSyncTests', 1);
 screens = Screen('Screens');
@@ -22,7 +28,7 @@ d = 3;
  
 dim = [6,0,6]; % extent of where dots can be in m: X, Y, Z. Depth is more than how far you're travelling (ns *speed) + a little extra 
 % 5 m across
-nClusters = 1000; % specify number of clusters
+nClusters = 750; % specify number of clusters
 nDotsPerCluster = 1;% number of dots per cluster
 nObjects = [];
  
@@ -48,12 +54,12 @@ object = [.15, .15, .15]; %length, width, height
 dotsperobj = 25;
 a = -0.075;
 b = 0.075;
-aboveground = 0;%-.1;
+aboveground = -.1;%-.1;
  
 if ~isempty(nObjects)
     for obj = 1:nObjects
         r = (b-a).*rand(dotsperobj,3) + a;
-        newpositions = [r(:,1)+positions(obj,1), r(:,2)+(aboveground+ height-b), r(:,3)+positions(obj,2)];
+        newpositions = [r(:,1)+positions(obj,1), r(:,2)+(height-b), r(:,3)+positions(obj,2)];
         dots = [dots; newpositions];
     end
 end
@@ -63,7 +69,7 @@ dots(end+1,:) = fixation_dot;
 fixation_idx = length(dots);
  
 % stationary and target positions
-aboveground = -.15;
+
 stationary_target = [0.5, aboveground+height-b, dim(3)/3; -0.5, aboveground+height-b, dim(3)/3];
 % stationary then target
  
@@ -123,6 +129,8 @@ v = diff(trajectory);
 v_target = diff(target_trajectory);
 T = NaN(size(v));
 v_constraint = nan(2,nDots,ns*fps);
+v_constraint_far = nan(2,nDots,ns*fps);
+v_constraint_close = nan(2,nDots,ns*fps);
  
 % holder matrices for screen positions
 x = nan(nDots,ns*fps);
@@ -158,8 +166,10 @@ for ii=1:ns*fps %
     % calculate velocity based on constraint eq, make sure x,y in m
     v_constraint(:,:,ii) = constraint_velocity_screen(Z(:,ii), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(end-2,ii));
     v_constraint(:,:,ii) = v_constraint(:,:,ii).*100;
-    v_constraint_far(:,:,ii) = constraint_velocity_screen(Z(:,ii)+1, [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(end-2,ii));
+    v_constraint_far(:,:,ii) = constraint_velocity_screen(ones(size(Z(:,ii)))*viewingdepths(2), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(end-2,ii));
     v_constraint_far(:,:,ii) = v_constraint_far(:,:,ii)*100;
+    v_constraint_close(:,:,ii) = constraint_velocity_screen(ones(size(Z(:,ii)))*viewingdepths(1), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(end-2,ii));
+    v_constraint_close(:,:,ii) = v_constraint_close(:,:,ii)*100;
     
     % Indices of dots to show based on how close/far the dots in the real world are (viewing depths)
     I(:,ii) = drawndots(:,3,ii) > viewingdepths(1)...
@@ -294,13 +304,13 @@ for ii = 1:ns*fps-1 %ns*fps-1
 %   
     % P1 = (x1, y1) = v_constraint, P2 =(x2,y2) = v_constraint_far, P0 =
     % (x0,y0) = rvelocityX, rvelocityY
-    a = (v_constraint_far(1,:,ii)-v_constraint(1,:,ii)).*(v_constraint(2,:,ii)-rvelocityY(:,ii)');
-    b = (v_constraint(1,:,ii)-rvelocityX(:,ii)').*(v_constraint_far(2,:,ii)-v_constraint(2,:,ii));
-    c = sqrt((v_constraint_far(1,:,ii) - v_constraint(1,:,ii)).^2 + (v_constraint_far(2,:,ii) - v_constraint(2,:,ii)).^2);
-    d = (abs(a-b)./c)';
-%     d = vecnorm((v_constraint(:,:,ii)'- [rvelocityX(:,ii) rvelocityY(:,ii)])')';
-%     val = max(d(I(:,ii)));
-%     idx = find(d == val);
+%     a = (v_constraint_far(1,:,ii)-v_constraint(1,:,ii)).*(v_constraint(2,:,ii)-rvelocityY(:,ii)');
+%     b = (v_constraint(1,:,ii)-rvelocityX(:,ii)').*(v_constraint_far(2,:,ii)-v_constraint(2,:,ii));
+%     c = sqrt((v_constraint_far(1,:,ii) - v_constraint(1,:,ii)).^2 + (v_constraint_far(2,:,ii) - v_constraint(2,:,ii)).^2);
+%     d = (abs(a-b)./c)';
+    d = vecnorm((v_constraint(:,:,ii)'- [rvelocityX(:,ii) rvelocityY(:,ii)])')';
+    val = max(d(I(:,ii)));
+    idx = find(d == val);
     val=maxk(d(I(:,ii)),dotsperobj);
     idx = NaN(size(val));
     for v = 1:length(val)
@@ -313,9 +323,9 @@ for ii = 1:ns*fps-1 %ns*fps-1
     hold on
     quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
 %     hold on, quiver(x(idx,ii), -y(idx,ii), v_constraint(1,idx,ii)', -v_constraint(2,idx,ii)', 'color', [1,0,0], 'AutoScale', 1, 'LineWidth', 2), axis equal
-    hold on, scatter(x(idx,ii), -y(idx,ii), 10,'r', 'filled');
+%     hold on, scatter(x(idx,ii), -y(idx,ii), 10,'r', 'filled');
 %     hold on, scatter(x(end,ii), -y(end,ii), 10, 'g', 'filled');
-    hold on, scatter(x(fixation_idx,ii), -y(fixation_idx,ii), 10, 'b', 'filled')
+%     hold on, scatter(x(fixation_idx,ii), -y(fixation_idx,ii), 10, 'b', 'filled')
 %     text(x(idx, ii), -y(idx, ii), num2str(val))
     xlim([-15,15])
     ylim([-10,10])
@@ -345,7 +355,7 @@ quiver(degX(I(:,ii),ii), -degY(I(:,ii),ii),rvXdeg(I(:,ii),ii), -rvYdeg(I(:,ii),i
     
 %% show target vs surround velocities throughout stim
 radius = 3; %in cm
-center = target_idx;
+center = stationary_idx;
 xlims = [-.08, .05];
 ylims = [-.025,.025];
 
@@ -361,11 +371,11 @@ for ii = 1:ns*fps-1
     distance2center_point = vecnorm((center_point - [x(:,ii),y(:,ii)])');
     window_idx = find(distance2center_point<radius);
     % plot window on object
-    % hold on, scatter(x(window_idx,ii), -y(window_idx,ii), 50,'g')
+    % hold on, scatter(x(window_idx,ii), -y(window_idx,ii), 50,[0.8500 0.3250 0.0980])
     
     % find non target velocities
     surround_idx = window_idx(~ismember(window_idx, center));
-    % hold on, scatter(x(surround_idx,ii), -y(surround_idx,ii), 50,"yellow")
+    % hold on, scatter(x(surround_idx,ii), -y(surround_idx,ii), 50,[0 0.4470 0.7410])
     
     % get target and surround velocity mean
     center_mean= mean([rvelocityX(center,ii), rvelocityY(center,ii)]);
@@ -383,7 +393,11 @@ for ii = 1:ns*fps-1
     hold on
     quiver(0,0,surround_mean(1), -surround_mean(2), 'color',[0,0,0.75],'AutoScale', 'off', 'LineWidth', 5)
     
-    hold on, plot([v_constraint(1,center(1), ii) v_constraint_far(1,center(1), ii)], -[v_constraint(2,center(2),ii) v_constraint_far(2,center(2),ii)], 'k', 'LineWidth', 2)
+    hold on, 
+    for jj = 1:length(center)
+        plot([v_constraint_close(1,center(jj), ii) v_constraint_far(1,center(jj), ii)], -[v_constraint_close(2,center(jj),ii) v_constraint_far(2,center(jj),ii)], 'k', 'LineWidth', 2)
+        
+    end
     axis equal
     xlim(xlims)
     ylim(ylims)
