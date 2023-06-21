@@ -14,7 +14,7 @@ visualize = 1; %turn figures on or off
 seed=2;
 rng(seed) % to have random dots that appear in the same "random" place each time
 ns = 2; % number of seconds
-world_speed = .75; % m/s speed of the observer in a straight line
+world_speed = 1; % m/s speed of the observer in a straight line
 fps = 120; % Screen(screenNumber,'FrameRate');
  
 height = .5;
@@ -32,8 +32,8 @@ nClusters = 750; % specify number of clusters
 nDotsPerCluster = 1;% number of dots per cluster
 nObjects = [];
  
-view_dist = .35; %m how far the screen is from the observer
-viewingdepths = [.5,   15]; % nearest and furthest dots that can show up, m
+view_dist = .05; %m how far the screen is from the observer
+viewingdepths = [.01,   5]; % nearest and furthest dots that can show up, m
  
 windowRect = [0           0        2560    1600]; % screen size in pixels (origin, width of screen, height of screen)
 pixels = windowRect(3:4); % pixel width and height of screen
