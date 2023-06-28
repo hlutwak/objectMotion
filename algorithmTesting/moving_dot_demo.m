@@ -13,9 +13,9 @@ visualize = 1; %turn figures on or off
  
 seed=2;
 rng(seed) % to have random dots that appear in the same "random" place each time
-ns = 2; % number of seconds
+ns = 1; % number of seconds
 world_speed = 1; % m/s speed of the observer in a straight line
-fps = 120; % Screen(screenNumber,'FrameRate');
+fps = Screen(screenNumber,'FrameRate'); %120
  
 height = .5;
 % gaze_angle = 15;
@@ -30,9 +30,9 @@ dim = [6,0,6]; % extent of where dots can be in m: X, Y, Z. Depth is more than h
 % 5 m across
 nClusters = 750; % specify number of clusters
 nDotsPerCluster = 1;% number of dots per cluster
-nObjects = [];
+nObjects = 25;
  
-view_dist = .05; %m how far the screen is from the observer
+view_dist = .35; %m how far the screen is from the observer
 viewingdepths = [.01,   5]; % nearest and furthest dots that can show up, m
  
 windowRect = [0           0        2560    1600]; % screen size in pixels (origin, width of screen, height of screen)
@@ -54,7 +54,7 @@ object = [.15, .15, .15]; %length, width, height
 dotsperobj = 25;
 a = -0.075;
 b = 0.075;
-aboveground = -.1;%-.1;
+aboveground = -.15;%-.1;
  
 if ~isempty(nObjects)
     for obj = 1:nObjects
@@ -355,7 +355,7 @@ quiver(degX(I(:,ii),ii), -degY(I(:,ii),ii),rvXdeg(I(:,ii),ii), -rvYdeg(I(:,ii),i
     
 %% show target vs surround velocities throughout stim
 radius = 3; %in cm
-center = stationary_idx;
+center = stationary_idx; %target_idx vs stationary_idx
 xlims = [-.08, .05];
 ylims = [-.025,.025];
 
