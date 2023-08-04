@@ -23,13 +23,13 @@ fixation = 3;
 speeds = 0.02:0.02:0.1; %speeds m/s, for target
 speeds = 0.5;
 s = 1;
-directions = deg2rad([0, 45, 90, 120,135, 180, 225, 270, 315]) ;
+directions = deg2rad([0, 45, 90, 120,135, 180, 225, 230, 315]) ;
 d = 3;
  
 dim = [6,0,6]; % extent of where dots can be in m: X, Y, Z. Depth is more than how far you're travelling (ns *speed) + a little extra 
 % 5 m across
 nClusters = 750; % specify number of clusters
-nDotsPerCluster = 1;% number of dots per cluster
+nDotsPerCluster = 15;% number of dots per cluster
 nObjects = 25;
  
 view_dist = .35; %m how far the screen is from the observer
@@ -50,10 +50,10 @@ positions = -dim(1)/2+2*dim(1)/2*rand(nObjects,2); %uniform random positions acr
 positions(:,2) = positions(:,2)+dim(3)/2;
  
 dots = repmat(clusters,nDotsPerCluster,1); % ground plane
-object = [.15, .15, .15]; %length, width, height
-dotsperobj = 25;
-a = -0.075;
-b = 0.075;
+object = [.075, .075, .075]; %length, width, height
+dotsperobj = 15;
+a = -object(1);
+b = object(1);
 aboveground = -.15;%-.1;
  
 if ~isempty(nObjects)
@@ -266,28 +266,28 @@ for ii = 1:ns*fps-1
     pause(1/fps)
 end
  
-figure
-ii = ns*fps-2;
-scatter(x(I(:,ii),ii), -y(I(:,ii),ii), 20,'k', 'filled');
-hold on,    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [0, 0, .5], 'AutoScale','off', 'LineWidth', 2), axis equal
- 
-hold on,    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint_far(1,I(:,ii),ii)', -v_constraint_far(2,I(:,ii),ii)', 'color', [.5, 0, 0], 'AutoScale','off', 'LineWidth', 2), axis equal
- 
-hold on, quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [.25, .25, .25], 'AutoScale','off', 'LineWidth', 2), axis equal
- 
-ii = ns*fps-1;
-hold on, scatter(x(I(:,ii),ii), -y(I(:,ii),ii),20, 'b', 'filled');
-    hold on, scatter(x(end,ii), -y(end,ii), 10,'c', 'filled');
- 
- 
-figure
-for ii = 1:ns*fps-1
-   quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [.25, .25, .25], 'AutoScale','off', 'LineWidth', 2), axis equal
-    xlim([-30,30])
-    ylim([-20,20])
- 
-    pause(1/fps)
-end
+% figure
+% ii = ns*fps-2;
+% scatter(x(I(:,ii),ii), -y(I(:,ii),ii), 20,'k', 'filled');
+% hold on,    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [0, 0, .5], 'AutoScale','off', 'LineWidth', 2), axis equal
+%  
+% hold on,    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint_far(1,I(:,ii),ii)', -v_constraint_far(2,I(:,ii),ii)', 'color', [.5, 0, 0], 'AutoScale','off', 'LineWidth', 2), axis equal
+%  
+% hold on, quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [.25, .25, .25], 'AutoScale','off', 'LineWidth', 2), axis equal
+%  
+% ii = ns*fps-1;
+% hold on, scatter(x(I(:,ii),ii), -y(I(:,ii),ii),20, 'b', 'filled');
+%     hold on, scatter(x(end,ii), -y(end,ii), 10,'c', 'filled');
+%  
+%  
+% figure
+% for ii = 1:ns*fps-1
+%    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [.25, .25, .25], 'AutoScale','off', 'LineWidth', 2), axis equal
+%     xlim([-30,30])
+%     ylim([-20,20])
+%  
+%     pause(1/fps)
+% end
  
 %% 
 % look at difference between screen velocity and constraint velocity
@@ -355,13 +355,13 @@ quiver(degX(I(:,ii),ii), -degY(I(:,ii),ii),rvXdeg(I(:,ii),ii), -rvYdeg(I(:,ii),i
     
 %% show target vs surround velocities throughout stim
 radius = 3; %in cm
-center = stationary_idx; %target_idx vs stationary_idx
+center = target_idx; %target_idx vs stationary_idx
 xlims = [-.08, .05];
 ylims = [-.025,.025];
 
 
 figure
-set(gcf,'position',[500, 500, 600, 400])
+% set(gcf,'position',[500, 500, 600, 400])
 set(gcf,'color','w');
 
 
