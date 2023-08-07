@@ -21,16 +21,16 @@ height = .5;
 % gaze_angle = 15;
 fixation = 3;
 speeds = 0.02:0.02:0.1; %speeds m/s, for target
-speeds = 0.5;
+speeds = 0.15;
 s = 1;
-directions = deg2rad([0, 45, 90, 120,135, 180, 225, 230, 315]) ;
-d = 3;
+directions = deg2rad([290, 45, 90, 120,135, 180, 230, 90, 315]) ;
+d = 1;
  
 dim = [6,0,6]; % extent of where dots can be in m: X, Y, Z. Depth is more than how far you're travelling (ns *speed) + a little extra 
 % 5 m across
 nClusters = 750; % specify number of clusters
 nDotsPerCluster = 15;% number of dots per cluster
-nObjects = 25;
+nObjects = 50;
  
 view_dist = .35; %m how far the screen is from the observer
 viewingdepths = [.01,   5]; % nearest and furthest dots that can show up, m
@@ -50,8 +50,11 @@ positions = -dim(1)/2+2*dim(1)/2*rand(nObjects,2); %uniform random positions acr
 positions(:,2) = positions(:,2)+dim(3)/2;
  
 dots = repmat(clusters,nDotsPerCluster,1); % ground plane
+% for no floor
+dots = [];
+
 object = [.075, .075, .075]; %length, width, height
-dotsperobj = 15;
+dotsperobj = 1;
 a = -object(1);
 b = object(1);
 aboveground = -.15;%-.1;
@@ -164,11 +167,11 @@ for ii=1:ns*fps %
     y(:,ii) = 100*view_dist*(drawndots(:,2,ii))./(drawndots(:,3,ii));
     
     % calculate velocity based on constraint eq, make sure x,y in m
-    v_constraint(:,:,ii) = constraint_velocity_screen(Z(:,ii), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(end-2,ii));
+    v_constraint(:,:,ii) = constraint_velocity_screen(Z(:,ii), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(fixation_idx,ii));
     v_constraint(:,:,ii) = v_constraint(:,:,ii).*100;
-    v_constraint_far(:,:,ii) = constraint_velocity_screen(ones(size(Z(:,ii)))*viewingdepths(2), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(end-2,ii));
+    v_constraint_far(:,:,ii) = constraint_velocity_screen(ones(size(Z(:,ii)))*viewingdepths(2), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(fixation_idx,ii));
     v_constraint_far(:,:,ii) = v_constraint_far(:,:,ii)*100;
-    v_constraint_close(:,:,ii) = constraint_velocity_screen(ones(size(Z(:,ii)))*viewingdepths(1), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(end-2,ii));
+    v_constraint_close(:,:,ii) = constraint_velocity_screen(ones(size(Z(:,ii)))*viewingdepths(1), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(fixation_idx,ii));
     v_constraint_close(:,:,ii) = v_constraint_close(:,:,ii)*100;
     
     % Indices of dots to show based on how close/far the dots in the real world are (viewing depths)
@@ -365,7 +368,7 @@ figure
 set(gcf,'color','w');
 
 
-for ii = 1:ns*fps-1
+for ii = 1 %:ns*fps-1
     clf
     center_point = [mean([max(x(center,ii)),min(x(center,ii))]), mean([max(y(center,ii)),min(y(center,ii))])];
     distance2center_point = vecnorm((center_point - [x(:,ii),y(:,ii)])');
@@ -388,10 +391,12 @@ for ii = 1:ns*fps-1
     quiver(zeros(size(rvelocityX(center,ii))),zeros(size(rvelocityX(center,ii))), rvelocityX(center,ii), -rvelocityY(center,ii), 'AutoScale', 'off', 'LineWidth', 2)
     
     % plot mean velocity object and surround
+    if dotsperobj>1
     hold on
     quiver(0,0, center_mean(1), -center_mean(2), 'r','AutoScale', 'off', 'LineWidth', 5)
     hold on
     quiver(0,0,surround_mean(1), -surround_mean(2), 'color',[0,0,0.75],'AutoScale', 'off', 'LineWidth', 5)
+    end
     
     hold on, 
     for jj = 1:length(center)
