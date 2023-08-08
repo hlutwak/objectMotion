@@ -21,7 +21,7 @@ height = .5;
 % gaze_angle = 15;
 fixation = 3;
 speeds = 0.02:0.02:0.1; %speeds m/s, for target
-speeds = 0.15;
+speeds = 0.075;
 s = 1;
 directions = deg2rad([290, 45, 90, 120,135, 180, 230, 90, 315]) ;
 d = 1;
@@ -51,10 +51,10 @@ positions(:,2) = positions(:,2)+dim(3)/2;
  
 dots = repmat(clusters,nDotsPerCluster,1); % ground plane
 % for no floor
-dots = [];
+% dots = [];
 
 object = [.075, .075, .075]; %length, width, height
-dotsperobj = 1;
+dotsperobj = 15;
 a = -object(1);
 b = object(1);
 aboveground = -.15;%-.1;
@@ -112,7 +112,11 @@ end
 trajectory = [zeros(ns*fps+1,1), zeros(ns*fps+1,1),(0:(world_speed/fps):(ns*world_speed))'];
  
 % trajectory = [zeros(ns*fps+1,1), 0.2*sin(0:(speed/fps):(ns*speed))', (0:(speed/fps):(ns*speed))'];
+%x-z plane
 target_trajectory = [speeds(s)*cos(directions(d))*(0:1/fps:ns)', zeros(ns*fps+1,1), speeds(s)*sin(directions(d))*(0:1/fps:ns)'];
+
+% target_trajectory = [speeds(s)*cos(directions(d))*(0:1/fps:ns)', -speeds(s)*sin(directions(d))*(0:1/fps:ns)', zeros(ns*fps+1,1)]; %x-y plane
+
 target_trajectory = target_trajectory + stationary_target(2,:);
  
 % rotation
@@ -169,9 +173,15 @@ for ii=1:ns*fps %
     % calculate velocity based on constraint eq, make sure x,y in m
     v_constraint(:,:,ii) = constraint_velocity_screen(Z(:,ii), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(fixation_idx,ii));
     v_constraint(:,:,ii) = v_constraint(:,:,ii).*100;
-    v_constraint_far(:,:,ii) = constraint_velocity_screen(ones(size(Z(:,ii)))*viewingdepths(2), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(fixation_idx,ii));
+%     v_constraint_far(:,:,ii) = constraint_velocity_screen(ones(size(Z(:,ii)))*viewingdepths(2), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(fixation_idx,ii));
+%     v_constraint_far(:,:,ii) = v_constraint_far(:,:,ii)*100;
+%     v_constraint_close(:,:,ii) = constraint_velocity_screen(ones(size(Z(:,ii)))*viewingdepths(1), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(fixation_idx,ii));
+%     v_constraint_close(:,:,ii) = v_constraint_close(:,:,ii)*100;
+
+% smaller range for far/close on constraint line
+    v_constraint_far(:,:,ii) = constraint_velocity_screen(ones(size(Z(:,ii))).*(Z(:,ii)+.2), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(fixation_idx,ii));
     v_constraint_far(:,:,ii) = v_constraint_far(:,:,ii)*100;
-    v_constraint_close(:,:,ii) = constraint_velocity_screen(ones(size(Z(:,ii)))*viewingdepths(1), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(fixation_idx,ii));
+    v_constraint_close(:,:,ii) = constraint_velocity_screen(ones(size(Z(:,ii))).*(Z(:,ii)-.2), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(fixation_idx,ii));
     v_constraint_close(:,:,ii) = v_constraint_close(:,:,ii)*100;
     
     % Indices of dots to show based on how close/far the dots in the real world are (viewing depths)
@@ -198,67 +208,7 @@ if visualize
     title('first frame')
 end
  
- 
- 
-%% Psychtoolbox
- 
-% make it skip certain sreen tests
-Screen('Preference', 'SkipSyncTests', 1);
-screens = Screen('Screens');
- 
-% choose external monitor
-screenNumber = max(screens);
-% choose small window on laptop screen
-% screenNumber = 0;
- 
-% Find the color values which correspond to white and black.
-white=WhiteIndex(screenNumber);
-black=BlackIndex(screenNumber);
- 
-% Round gray to integral number, to avoid roundoff artifacts with some
-% graphics cards:
-gray=round((white+black)/2);
- 
-PsychImaging('PrepareConfiguration');
-PsychImaging('AddTask', 'General', 'NormalizedHighresColorRange', 1);
-% Open an on screen window and color it black
-% [window, windowRect] = PsychImaging('OpenWindow', screenNumber, 0);
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber,0,[0,0,1280, 800]); %[0,0,1280, 800]
- 
-Screen('BlendFunction', window, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-screen_rect = Screen('Rect',window);
- 
-ctr = windowRect(3:4)/2;
-vbl = Screen('Flip',window);
- 
-sr_hor = round(screen_rect(3)/2); % Middle of the screen, horizontally, in pixels
-sr_ver = round(screen_rect(4)/2); % Middle of the screen, vertically, in pixels
-fix_hor = sr_hor;     % Horizontal location of fixation cross, in pixels
-fix_ver = sr_ver;     % Vertical location of fixation cross, in pixels
- 
- 
-Xdraw = x;
-Ydraw = y;
- 
- 
-for ii=1:ns*fps
-    
-    xy = [Xdraw(I(:,ii),ii),Ydraw(I(:,ii),ii)]'.*ppcm';
-    % draw dots on each frame, in the correct window, at xy positions,
-    % size, color, center of the screen, 2 = draw round dots with
-    % anti-aliasing
-    Screen('DrawDots', window, xy, 5 ,[1,1,1] ,ctr, 2);
-%     Screen('DrawDots', window, xy(:,end), 10 ,[0,1,0] ,ctr, 2);
-    Screen('DrawDots', window, [x(fixation_idx); y(fixation_idx)], 8 ,[1,0,0] ,ctr, 2);
- 
-    vbl = Screen('Flip',window);
-    
-end
- 
-sca;
- 
- 
-%% plot velocities
+ % plot velocities
 figure
 for ii = 1:ns*fps-1
     quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
@@ -292,52 +242,52 @@ end
 %     pause(1/fps)
 % end
  
-%% 
-% look at difference between screen velocity and constraint velocity
-% label moving object in red
-figure
-set(gcf,'position',[250, 250, 800, 600])
-set(gcf,'color','w');
-for ii = 1:ns*fps-1 %ns*fps-1
-    clf
-    % getting distance to constraint segment
-%     vec = v_constraint(:,:,ii)'- v_constraint_far(:,:,ii)'; %vector between close and far velocities
-%     slope = vec(:,2)./vec(:,1); 
-%     intercept = v_constraint(2,:,ii)' - slope.*v_constraint(1,:,ii)'; %intercept = y-slope*x
-%   
-    % P1 = (x1, y1) = v_constraint, P2 =(x2,y2) = v_constraint_far, P0 =
-    % (x0,y0) = rvelocityX, rvelocityY
-%     a = (v_constraint_far(1,:,ii)-v_constraint(1,:,ii)).*(v_constraint(2,:,ii)-rvelocityY(:,ii)');
-%     b = (v_constraint(1,:,ii)-rvelocityX(:,ii)').*(v_constraint_far(2,:,ii)-v_constraint(2,:,ii));
-%     c = sqrt((v_constraint_far(1,:,ii) - v_constraint(1,:,ii)).^2 + (v_constraint_far(2,:,ii) - v_constraint(2,:,ii)).^2);
-%     d = (abs(a-b)./c)';
-    d = vecnorm((v_constraint(:,:,ii)'- [rvelocityX(:,ii) rvelocityY(:,ii)])')';
-    val = max(d(I(:,ii)));
-    idx = find(d == val);
-    val=maxk(d(I(:,ii)),dotsperobj);
-    idx = NaN(size(val));
-    for v = 1:length(val)
-        idx(v) = find(d == val(v));
-    end
-%     scatter(d(end), val)
-%     xlim([0,0.25]); 
-%     pause(1/fps*2)
-    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [.25, 0, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
-    hold on
-    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
-%     hold on, quiver(x(idx,ii), -y(idx,ii), v_constraint(1,idx,ii)', -v_constraint(2,idx,ii)', 'color', [1,0,0], 'AutoScale', 1, 'LineWidth', 2), axis equal
-%     hold on, scatter(x(idx,ii), -y(idx,ii), 10,'r', 'filled');
-%     hold on, scatter(x(end,ii), -y(end,ii), 10, 'g', 'filled');
-%     hold on, scatter(x(fixation_idx,ii), -y(fixation_idx,ii), 10, 'b', 'filled')
-%     text(x(idx, ii), -y(idx, ii), num2str(val))
-    xlim([-15,15])
-    ylim([-10,10])
-    axis off
-    pause(1/fps)
-    
-end
+% %% 
+% % look at difference between screen velocity and constraint velocity
+% % label moving object in red
+% figure
+% set(gcf,'position',[250, 250, 800, 600])
+% set(gcf,'color','w');
+% for ii = 1:ns*fps-1 %ns*fps-1
+%     clf
+%     % getting distance to constraint segment
+% %     vec = v_constraint(:,:,ii)'- v_constraint_far(:,:,ii)'; %vector between close and far velocities
+% %     slope = vec(:,2)./vec(:,1); 
+% %     intercept = v_constraint(2,:,ii)' - slope.*v_constraint(1,:,ii)'; %intercept = y-slope*x
+% %   
+%     % P1 = (x1, y1) = v_constraint, P2 =(x2,y2) = v_constraint_far, P0 =
+%     % (x0,y0) = rvelocityX, rvelocityY
+% %     a = (v_constraint_far(1,:,ii)-v_constraint(1,:,ii)).*(v_constraint(2,:,ii)-rvelocityY(:,ii)');
+% %     b = (v_constraint(1,:,ii)-rvelocityX(:,ii)').*(v_constraint_far(2,:,ii)-v_constraint(2,:,ii));
+% %     c = sqrt((v_constraint_far(1,:,ii) - v_constraint(1,:,ii)).^2 + (v_constraint_far(2,:,ii) - v_constraint(2,:,ii)).^2);
+% %     d = (abs(a-b)./c)';
+%     d = vecnorm((v_constraint(:,:,ii)'- [rvelocityX(:,ii) rvelocityY(:,ii)])')';
+%     val = max(d(I(:,ii)));
+%     idx = find(d == val);
+%     val=maxk(d(I(:,ii)),dotsperobj);
+%     idx = NaN(size(val));
+%     for v = 1:length(val)
+%         idx(v) = find(d == val(v));
+%     end
+% %     scatter(d(end), val)
+% %     xlim([0,0.25]); 
+% %     pause(1/fps*2)
+%     quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [.25, 0, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
+%     hold on
+%     quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
+% %     hold on, quiver(x(idx,ii), -y(idx,ii), v_constraint(1,idx,ii)', -v_constraint(2,idx,ii)', 'color', [1,0,0], 'AutoScale', 1, 'LineWidth', 2), axis equal
+% %     hold on, scatter(x(idx,ii), -y(idx,ii), 10,'r', 'filled');
+% %     hold on, scatter(x(end,ii), -y(end,ii), 10, 'g', 'filled');
+% %     hold on, scatter(x(fixation_idx,ii), -y(fixation_idx,ii), 10, 'b', 'filled')
+% %     text(x(idx, ii), -y(idx, ii), num2str(val))
+%     xlim([-15,15])
+%     ylim([-10,10])
+%     axis off
+%     pause(1/fps)
+%     
+% end
  
-%% surround velocities
+% surround velocities
 % calculate in terms of degrees
 degX = atand(drawndots(:,1,:)./drawndots(:,3,:));
 degY = atand(drawndots(:,2,:)./drawndots(:,3,:));
@@ -356,7 +306,7 @@ quiver(degX(I(:,ii),ii), -degY(I(:,ii),ii),rvXdeg(I(:,ii),ii), -rvYdeg(I(:,ii),i
     ylim([-30,30])
     axis equal
     
-%% show target vs surround velocities throughout stim
+%show target vs surround velocities throughout stim
 radius = 3; %in cm
 center = target_idx; %target_idx vs stationary_idx
 xlims = [-.08, .05];
@@ -368,7 +318,7 @@ figure
 set(gcf,'color','w');
 
 
-for ii = 1 %:ns*fps-1
+for ii = 1 %1:ns*fps-1
     clf
     center_point = [mean([max(x(center,ii)),min(x(center,ii))]), mean([max(y(center,ii)),min(y(center,ii))])];
     distance2center_point = vecnorm((center_point - [x(:,ii),y(:,ii)])');
@@ -439,7 +389,65 @@ hold on
 quiver(0,0, stationary_mean(1), -stationary_mean(2), 'r','AutoScale', 'off', 'LineWidth', 5)
 hold on
 quiver(0,0,surround_mean(1), -surround_mean(2), 'color',[0,0,0.75],'AutoScale', 'off', 'LineWidth', 5)
-
-
-               
+        
 hold on, plot([v_constraint(1,target_idx(1), ii) v_constraint_far(1,target_idx(1), ii)], -[v_constraint(2,target_idx(2),ii) v_constraint_far(2,target_idx(2),ii)], 'k', 'LineWidth', 2)
+
+
+%% Psychtoolbox
+ 
+% make it skip certain sreen tests
+Screen('Preference', 'SkipSyncTests', 1);
+screens = Screen('Screens');
+ 
+% choose external monitor
+screenNumber = max(screens);
+% choose small window on laptop screen
+% screenNumber = 0;
+ 
+% Find the color values which correspond to white and black.
+white=WhiteIndex(screenNumber);
+black=BlackIndex(screenNumber);
+ 
+% Round gray to integral number, to avoid roundoff artifacts with some
+% graphics cards:
+gray=round((white+black)/2);
+ 
+PsychImaging('PrepareConfiguration');
+PsychImaging('AddTask', 'General', 'NormalizedHighresColorRange', 1);
+% Open an on screen window and color it black
+% [window, windowRect] = PsychImaging('OpenWindow', screenNumber, 0);
+[window, windowRect] = PsychImaging('OpenWindow', screenNumber,0,[0,0,1280, 800]); %[0,0,1280, 800]
+ 
+Screen('BlendFunction', window, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+screen_rect = Screen('Rect',window);
+ 
+ctr = windowRect(3:4)/2;
+vbl = Screen('Flip',window);
+ 
+sr_hor = round(screen_rect(3)/2); % Middle of the screen, horizontally, in pixels
+sr_ver = round(screen_rect(4)/2); % Middle of the screen, vertically, in pixels
+fix_hor = sr_hor;     % Horizontal location of fixation cross, in pixels
+fix_ver = sr_ver;     % Vertical location of fixation cross, in pixels
+ 
+ 
+Xdraw = x;
+Ydraw = y;
+ 
+ 
+for ii=1:ns*fps
+    
+    xy = [Xdraw(I(:,ii),ii),Ydraw(I(:,ii),ii)]'.*ppcm';
+    % draw dots on each frame, in the correct window, at xy positions,
+    % size, color, center of the screen, 2 = draw round dots with
+    % anti-aliasing
+    Screen('DrawDots', window, xy, 5 ,[1,1,1] ,ctr, 2);
+%     Screen('DrawDots', window, xy(:,end), 10 ,[0,1,0] ,ctr, 2);
+    Screen('DrawDots', window, [x(fixation_idx); y(fixation_idx)], 8 ,[1,0,0] ,ctr, 2);
+ 
+    vbl = Screen('Flip',window);
+    
+end
+ 
+sca;
+ 
+ 
