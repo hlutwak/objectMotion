@@ -3,6 +3,7 @@
 addpath(genpath('/Users/hopelutwak/Desktop/objectMotion'))
 addpath(genpath('/Applications/Psychtoolbox'))
 addpath('/Users/hopelutwak/Documents/MATLAB/VisTools/')
+
 %% Generate scene
     frame_rate = 85;
     translation = [0,  0, 1.4]/frame_rate;

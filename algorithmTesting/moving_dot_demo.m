@@ -1,5 +1,7 @@
 %%
 addpath(genpath('/Users/hopelutwak/Desktop/objectMotion')) % add psychtoolbox to your path
+%% windows
+addpath(genpath('C:\toolbox'))
 
 
 %%
