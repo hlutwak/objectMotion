@@ -23,15 +23,15 @@ height = .5;
 % gaze_angle = 15;
 fixation = 3;
 speeds = 0.02:0.02:0.1; %speeds m/s, for target
-speeds = 0.075;
+speeds = 0.0375;
 s = 1;
-directions = deg2rad([290, 45, 90, 120,135, 180, 230, 90, 315]) ;
+directions = deg2rad([90, 45, 90, 120,135, 180, 230, 90, 315]) ;
 d = 1;
  
 dim = [6,0,6]; % extent of where dots can be in m: X, Y, Z. Depth is more than how far you're travelling (ns *speed) + a little extra 
 % 5 m across
 nClusters = 750; % specify number of clusters
-nDotsPerCluster = 15;% number of dots per cluster
+nDotsPerCluster = 1;% number of dots per cluster
 nObjects = 50;
  
 view_dist = .35; %m how far the screen is from the observer
@@ -74,8 +74,10 @@ dots(end+1,:) = fixation_dot;
 fixation_idx = length(dots);
  
 % stationary and target positions
-
-stationary_target = [0.5, aboveground+height-b, dim(3)/3; -0.5, aboveground+height-b, dim(3)/3];
+% stationary on left and moving on right to demonstrate simulation with
+% correct direction degree labels - left hand side object always gets
+% mirror added motion
+stationary_target = [-0.5, aboveground+height-b, dim(3)/3; 0.5, aboveground+height-b, dim(3)/3];
 % stationary then target
  
 for obj = 1:2 %stationary obj and moving obj
@@ -115,9 +117,9 @@ trajectory = [zeros(ns*fps+1,1), zeros(ns*fps+1,1),(0:(world_speed/fps):(ns*worl
  
 % trajectory = [zeros(ns*fps+1,1), 0.2*sin(0:(speed/fps):(ns*speed))', (0:(speed/fps):(ns*speed))'];
 %x-z plane
-target_trajectory = [speeds(s)*cos(directions(d))*(0:1/fps:ns)', zeros(ns*fps+1,1), speeds(s)*sin(directions(d))*(0:1/fps:ns)'];
+target_trajectory = [sign(stationary_target(2,1))*speeds(s)*cos(directions(d))*(0:1/fps:ns)', zeros(ns*fps+1,1), speeds(s)*sin(directions(d))*(0:1/fps:ns)'];
 
-% target_trajectory = [speeds(s)*cos(directions(d))*(0:1/fps:ns)', -speeds(s)*sin(directions(d))*(0:1/fps:ns)', zeros(ns*fps+1,1)]; %x-y plane
+% target_trajectory = [sign(stationary_target(2,1))*speeds(s)*cos(directions(d))*(0:1/fps:ns)', -speeds(s)*sin(directions(d))*(0:1/fps:ns)', zeros(ns*fps+1,1)]; %x-y plane
 
 target_trajectory = target_trajectory + stationary_target(2,:);
  
@@ -127,8 +129,8 @@ theta = atan(height./(fixation-world_speed*secs)); % update theta for observer f
  
 % visualize observer trajectory within dots
 if visualize
-    figure(1), hold on, plot3(trajectory(:,3), trajectory(:,1), -trajectory(:,2), 'LineWidth', 3)
-    hold on, plot3(target_trajectory(:,3), target_trajectory(:,1), -target_trajectory(:,2), 'LineWidth', 2)
+    figure(1), hold on, plot3(trajectory(:,3), -trajectory(:,1), -trajectory(:,2), 'LineWidth', 3)
+    hold on, plot3(target_trajectory(:,3), -target_trajectory(:,1), -target_trajectory(:,2), 'LineWidth', 2)
     legend('dots', 'trajectory', 'moving object')
     title('environment and observer trajectory')
 end
@@ -210,16 +212,16 @@ if visualize
     title('first frame')
 end
  
- % plot velocities
-figure
-for ii = 1:ns*fps-1
-    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
- 
-    xlim([-30,30])
-    ylim([-20,20])
- 
-    pause(1/fps)
-end
+%  plot velocities
+% figure
+% for ii = 1:ns*fps-1
+%     quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
+%  
+%     xlim([-30,30])
+%     ylim([-20,20])
+%  
+%     pause(1/fps)
+% end
  
 % figure
 % ii = ns*fps-2;
@@ -301,17 +303,17 @@ degY = atand(drawndots(:,2,:)./drawndots(:,3,:));
 rvXdeg = atand(rvelocityX/100*view_dist./(view_dist^2+(rvelocityX/100+x(:,1:end-1).*x(:,1:end-1))));
 rvYdeg = atand(rvelocityY/100*view_dist./(view_dist^2+(rvelocityY/100+y(:,1:end-1).*y(:,1:end-1))));
  
-figure, scatter(degX(I(:,ii),ii), -degY(I(:,ii),ii))
-hold on
-quiver(degX(I(:,ii),ii), -degY(I(:,ii),ii),rvXdeg(I(:,ii),ii), -rvYdeg(I(:,ii),ii), 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2)
-    xlim([-40,40])
-    ylim([-30,30])
-    axis equal
+% figure, scatter(degX(I(:,ii),ii), -degY(I(:,ii),ii))
+% hold on
+% quiver(degX(I(:,ii),ii), -degY(I(:,ii),ii),rvXdeg(I(:,ii),ii), -rvYdeg(I(:,ii),ii), 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2)
+%     xlim([-40,40])
+%     ylim([-30,30])
+%     axis equal
     
 %show target vs surround velocities throughout stim
 radius = 3; %in cm
 center = target_idx; %target_idx vs stationary_idx
-xlims = [-.08, .05];
+xlims = [-.01, .08];
 ylims = [-.025,.025];
 
 
