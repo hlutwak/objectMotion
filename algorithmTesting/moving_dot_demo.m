@@ -23,7 +23,7 @@ height = .5;
 % gaze_angle = 15;
 fixation = 3;
 speeds = 0.02:0.02:0.1; %speeds m/s, for target
-speeds = 0.0375;
+speeds = 1;
 s = 1;
 directions = deg2rad([90, 45, 90, 120,135, 180, 230, 90, 315]) ;
 d = 1;
@@ -34,7 +34,7 @@ nClusters = 750; % specify number of clusters
 nDotsPerCluster = 1;% number of dots per cluster
 nObjects = 50;
  
-view_dist = .35; %m how far the screen is from the observer
+view_dist = .5; %m how far the screen is from the observer
 viewingdepths = [.01,   5]; % nearest and furthest dots that can show up, m
  
 windowRect = [0           0        2560    1600]; % screen size in pixels (origin, width of screen, height of screen)
@@ -362,6 +362,64 @@ for ii = 1 %1:ns*fps-1
     ylim(ylims)
     pause(1/fps)
 end
+
+%% calculating distance to constraint line 
+
+% for one frame
+% over stimulus duration
+ 
+% %% 
+% % look at difference between screen velocity and constraint velocity
+% % label moving object in red
+figure
+set(gcf,'position',[250, 250, 800, 400])
+set(gcf,'color','w');
+for ii = 1 %ns*fps-1
+    clf
+%     getting distance to constraint segment
+%     vec = v_constraint(:,:,ii)'- v_constraint_far(:,:,ii)'; %vector between close and far velocities
+%     slope = vec(:,2)./vec(:,1); 
+%     intercept = v_constraint(2,:,ii)' - slope.*v_constraint(1,:,ii)'; %intercept = y-slope*x
+%   
+
+%     line passes through P1 (x1, y1) and P2 (x2, y2), distance of point (x0, y0) to line is
+   %        distance (P1, P2, (x0, y0)) =
+   %        abs((x2-x1)(y1-y0)-(x1-x0)(y2-y1))/ sqrt((x2-x1)^2 +(y2-y1)^2) 
+
+%     P1 = (x1,y1) = v_constraint_close
+%     P2 =(x2,y2) = v_constraint_far
+%     P0 =(x0,y0) = rvelocityX, rvelocityY
+
+    a = (v_constraint_far(1,:,ii)-v_constraint_close(1,:,ii)).*(v_constraint_close(2,:,ii)-rvelocityY(:,ii)');
+    b = (v_constraint_close(1,:,ii)-rvelocityX(:,ii)').*(v_constraint_far(2,:,ii)-v_constraint_close(2,:,ii));
+    c = sqrt((v_constraint_far(1,:,ii) - v_constraint_close(1,:,ii)).^2 + (v_constraint_far(2,:,ii) - v_constraint_close(2,:,ii)).^2);
+    d = (abs(a-b)./c)';
+%     d = vecnorm((v_constraint(:,:,ii)'- [rvelocityX(:,ii) rvelocityY(:,ii)])')';
+    val = max(d(I(:,ii)));
+    idx = find(d == val);
+    val = maxk(d(I(:,ii)),dotsperobj);
+    idx = NaN(size(val));
+    for v = 1:length(val)
+        idx(v) = find(d == val(v));
+    end
+    scatter(d(end), val)
+    xlim([0,0.25]); 
+% %     pause(1/fps*2)
+    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [1,0,0], 'AutoScale', 1, 'LineWidth', 2), axis equal
+    hold on
+    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
+    hold on, quiver(x(I(idx,ii)), -y(I(idx,ii)), v_constraint(1,I(idx,ii),ii)', -v_constraint(2,I(idx,ii),ii)', 'color', [1,0,0], 'AutoScale', 1, 'LineWidth', 2), axis equal
+    hold on, scatter(x(idx,ii), -y(idx,ii), 10,'r', 'filled');
+    hold on, scatter(x(end,ii), -y(end,ii), 10, 'g', 'filled');
+    hold on, scatter(x(fixation_idx,ii), -y(fixation_idx,ii), 10, 'b', 'filled')
+    text(x(idx, ii), -y(idx, ii), num2str(val))
+%     xlim([-15,15])
+%     ylim([-10,10])
+%     axis off
+%     pause(1/fps)
+%     
+end
+ 
 
 %%
 % get stationary window
