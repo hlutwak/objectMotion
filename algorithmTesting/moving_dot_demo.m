@@ -2,7 +2,7 @@
 addpath(genpath('/Users/hopelutwak/Desktop/objectMotion')) % add psychtoolbox to your path
 %% windows
 addpath(genpath('C:\toolbox'))
-
+addpath(genpath('C:\Users\hlutw\OneDrive\Documents\MATLAB'))
 
 %%
 
@@ -381,7 +381,7 @@ for ii = 1 %ns*fps-1
 %     slope = vec(:,2)./vec(:,1); 
 %     intercept = v_constraint(2,:,ii)' - slope.*v_constraint(1,:,ii)'; %intercept = y-slope*x
 %   
-
+        % this is distance point to entire line (not segment)
 %     line passes through P1 (x1, y1) and P2 (x2, y2), distance of point (x0, y0) to line is
    %        distance (P1, P2, (x0, y0)) =
    %        abs((x2-x1)(y1-y0)-(x1-x0)(y2-y1))/ sqrt((x2-x1)^2 +(y2-y1)^2) 
@@ -390,25 +390,27 @@ for ii = 1 %ns*fps-1
 %     P2 =(x2,y2) = v_constraint_far
 %     P0 =(x0,y0) = rvelocityX, rvelocityY
 
-    a = (v_constraint_far(1,:,ii)-v_constraint_close(1,:,ii)).*(v_constraint_close(2,:,ii)-rvelocityY(:,ii)');
-    b = (v_constraint_close(1,:,ii)-rvelocityX(:,ii)').*(v_constraint_far(2,:,ii)-v_constraint_close(2,:,ii));
-    c = sqrt((v_constraint_far(1,:,ii) - v_constraint_close(1,:,ii)).^2 + (v_constraint_far(2,:,ii) - v_constraint_close(2,:,ii)).^2);
-    d = (abs(a-b)./c)';
+%     a = (v_constraint_far(1,:,ii)-v_constraint_close(1,:,ii)).*(v_constraint_close(2,:,ii)-rvelocityY(:,ii)');
+%     b = (v_constraint_close(1,:,ii)-rvelocityX(:,ii)').*(v_constraint_far(2,:,ii)-v_constraint_close(2,:,ii));
+%     c = sqrt((v_constraint_far(1,:,ii) - v_constraint_close(1,:,ii)).^2 + (v_constraint_far(2,:,ii) - v_constraint_close(2,:,ii)).^2);
+%     d = (abs(a-b)./c)';
 %     d = vecnorm((v_constraint(:,:,ii)'- [rvelocityX(:,ii) rvelocityY(:,ii)])')';
     val = max(d(I(:,ii)));
     idx = find(d == val);
-    val = maxk(d(I(:,ii)),dotsperobj);
-    idx = NaN(size(val));
-    for v = 1:length(val)
-        idx(v) = find(d == val(v));
-    end
-    scatter(d(end), val)
-    xlim([0,0.25]); 
+    
+    onscreen_idx = find(I,ii);
+    [val,idx] = maxk(d(onscreen),dotsperobj);
+%     idx = NaN(size(val));
+%     for v = 1:length(val)
+%         idx(v) = find(d == val(v));
+%     end
+%     scatter(d(end), val)
+%     xlim([0,0.25]); 
 % %     pause(1/fps*2)
-    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [1,0,0], 'AutoScale', 1, 'LineWidth', 2), axis equal
+    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [1,0,0], 'AutoScale', 0, 'LineWidth', 2), axis equal
     hold on
-    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
-    hold on, quiver(x(I(idx,ii)), -y(I(idx,ii)), v_constraint(1,I(idx,ii),ii)', -v_constraint(2,I(idx,ii),ii)', 'color', [1,0,0], 'AutoScale', 1, 'LineWidth', 2), axis equal
+    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [.25, .25, .25], 'AutoScale', 0, 'LineWidth', 2), axis equal
+    hold on, quiver(x(onscreen(idx),ii), -y(onscreen(idx),ii), v_constraint(1,onscreen(idx),ii)', -v_constraint(2,onscreen(idx),ii)', 'color', [0,0,1], 'AutoScale', 'off', 'LineWidth', 2), axis equal
     hold on, scatter(x(idx,ii), -y(idx,ii), 10,'r', 'filled');
     hold on, scatter(x(end,ii), -y(end,ii), 10, 'g', 'filled');
     hold on, scatter(x(fixation_idx,ii), -y(fixation_idx,ii), 10, 'b', 'filled')
