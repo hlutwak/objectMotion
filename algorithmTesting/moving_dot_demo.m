@@ -395,11 +395,13 @@ for ii = 1 %ns*fps-1
 %     c = sqrt((v_constraint_far(1,:,ii) - v_constraint_close(1,:,ii)).^2 + (v_constraint_far(2,:,ii) - v_constraint_close(2,:,ii)).^2);
 %     d = (abs(a-b)./c)';
 %     d = vecnorm((v_constraint(:,:,ii)'- [rvelocityX(:,ii) rvelocityY(:,ii)])')';
-    val = max(d(I(:,ii)));
-    idx = find(d == val);
     
-    onscreen_idx = find(I,ii);
-    [val,idx] = maxk(d(onscreen),dotsperobj);
+    onscreen_idx = find(I(:,ii));
+    d = NaN(1, length(onscreen_idx));
+    for jj = 1:length(onscreen_idx)
+        d(jj) = point2segment([rvelocityX(onscreen_idx(jj),ii); rvelocityY(onscreen_idx(jj),ii)], v_constraint_far(:,onscreen_idx(jj),ii), v_constraint_close(:,onscreen_idx(jj),ii));
+    end
+    [val,idx] = maxk(d,dotsperobj);
 %     idx = NaN(size(val));
 %     for v = 1:length(val)
 %         idx(v) = find(d == val(v));
@@ -410,7 +412,7 @@ for ii = 1 %ns*fps-1
     quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [1,0,0], 'AutoScale', 0, 'LineWidth', 2), axis equal
     hold on
     quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [.25, .25, .25], 'AutoScale', 0, 'LineWidth', 2), axis equal
-    hold on, quiver(x(onscreen(idx),ii), -y(onscreen(idx),ii), v_constraint(1,onscreen(idx),ii)', -v_constraint(2,onscreen(idx),ii)', 'color', [0,0,1], 'AutoScale', 'off', 'LineWidth', 2), axis equal
+    hold on, quiver(x(onscreen_idx(idx),ii), -y(onscreen_idx(idx),ii), v_constraint(1,onscreen_idx(idx),ii)', -v_constraint(2,onscreen_idx(idx),ii)', 'color', [0,0,1], 'AutoScale', 'off', 'LineWidth', 2), axis equal
     hold on, scatter(x(idx,ii), -y(idx,ii), 10,'r', 'filled');
     hold on, scatter(x(end,ii), -y(end,ii), 10, 'g', 'filled');
     hold on, scatter(x(fixation_idx,ii), -y(fixation_idx,ii), 10, 'b', 'filled')
