@@ -25,18 +25,3 @@ else
     theta = acos(dot(point_vec, segment_vec)/(norm(point_vec)*norm(segment_vec)));
     d = norm(point_vec)*sin(theta);
 end
-
-
-%
-% test point 2 segment
-% points = -5+10*rand(2, 50);
-% starting = [0,1]';
-% ending = [2, -3]';
-% 
-% d = zeros(1, length(points));
-% for ii = 1:length(points)
-%     d(ii) = point2segment(points(:,ii), starting, ending);
-% end
-% 
-% figure, scatter(points(1,:), points(2,:))
-% hold on, plot([starting(1), ending(1)], [starting(2), ending(2)], 'k')
