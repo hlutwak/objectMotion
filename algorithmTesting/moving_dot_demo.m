@@ -24,7 +24,7 @@ height = .5;
 % gaze_angle = 15;
 fixation = 3;
 speeds = 0.02:0.02:0.1; %speeds m/s, for target
-speeds =  0.0187; % 0.0187, 0.0375
+speeds =  .5; % 0.0187, 0.0375
 s = 1;
 directions = deg2rad([330, 45, 90, 120,135, 180, 230, 90, 315]) ;
 d = 1;
@@ -403,6 +403,16 @@ for ii = 1: ns*fps-1
 %     
 end
  
+
+%% calculations for finding optimal directions for object motion
+ii= 1;
+figure, scatter(x(target_idx,ii), -y(target_idx,ii))
+xlim([-15,15])
+ylim([-2,2])
+axis equal
+hold on, scatter(x(target_idx(1),ii), -y(target_idx(1), ii), 'filled')
+
+direction = 360-mean(atand(abs(y(target_idx,ii)./x(target_idx,ii))));
 
 %%
 % get stationary window
