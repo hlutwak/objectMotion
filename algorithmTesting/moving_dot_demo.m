@@ -24,10 +24,11 @@ height = .5;
 % gaze_angle = 15;
 fixation = 3;
 speeds = 0.02:0.02:0.1; %speeds m/s, for target
-speeds =  .5; % 0.0187, 0.0375
+speeds =  0.075; % 0.0187, 0.0375
 s = 1;
-directions = deg2rad([330, 45, 90, 120,135, 180, 230, 90, 315]) ;
+directions = deg2rad([270, 45, 90, 120,135, 180, 230, 90, 315]) ;
 d = 1;
+depth_range = .1;
  
 dim = [6,0,6]; % extent of where dots can be in m: X, Y, Z. Depth is more than how far you're travelling (ns *speed) + a little extra 
 % 5 m across
@@ -118,9 +119,9 @@ trajectory = [zeros(ns*fps+1,1), zeros(ns*fps+1,1),(0:(world_speed/fps):(ns*worl
  
 % trajectory = [zeros(ns*fps+1,1), 0.2*sin(0:(speed/fps):(ns*speed))', (0:(speed/fps):(ns*speed))'];
 %x-z plane
-% target_trajectory = [sign(stationary_target(2,1))*speeds(s)*cos(directions(d))*(0:1/fps:ns)', zeros(ns*fps+1,1), speeds(s)*sin(directions(d))*(0:1/fps:ns)'];
+target_trajectory = [sign(stationary_target(2,1))*speeds(s)*cos(directions(d))*(0:1/fps:ns)', zeros(ns*fps+1,1), speeds(s)*sin(directions(d))*(0:1/fps:ns)'];
 
-target_trajectory = [sign(stationary_target(2,1))*speeds(s)*cos(directions(d))*(0:1/fps:ns)', -speeds(s)*sin(directions(d))*(0:1/fps:ns)', zeros(ns*fps+1,1)]; %x-y plane
+% target_trajectory = [sign(stationary_target(2,1))*speeds(s)*cos(directions(d))*(0:1/fps:ns)', -speeds(s)*sin(directions(d))*(0:1/fps:ns)', zeros(ns*fps+1,1)]; %x-y plane
 
 target_trajectory = target_trajectory + stationary_target(2,:);
  
@@ -184,9 +185,9 @@ for ii=1:ns*fps %
 %     v_constraint_close(:,:,ii) = v_constraint_close(:,:,ii)*100;
 
 % smaller range for far/close on constraint line
-    v_constraint_far(:,:,ii) = constraint_velocity_screen(ones(size(Z(:,ii))).*(Z(:,ii)+.2), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(fixation_idx,ii));
+    v_constraint_far(:,:,ii) = constraint_velocity_screen(ones(size(Z(:,ii))).*(Z(:,ii)+depth_range), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(fixation_idx,ii));
     v_constraint_far(:,:,ii) = v_constraint_far(:,:,ii)*100;
-    v_constraint_close(:,:,ii) = constraint_velocity_screen(ones(size(Z(:,ii))).*(Z(:,ii)-.2), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(fixation_idx,ii));
+    v_constraint_close(:,:,ii) = constraint_velocity_screen(ones(size(Z(:,ii))).*(Z(:,ii)-depth_range), [x(:,ii)';y(:,ii)']./100, T(ii,:), view_dist,Z(fixation_idx,ii));
     v_constraint_close(:,:,ii) = v_constraint_close(:,:,ii)*100;
     
     % Indices of dots to show based on how close/far the dots in the real world are (viewing depths)
@@ -383,7 +384,7 @@ for ii = 1: ns*fps-1
     end
     [val,idx] = maxk(d,sum(I(target_idx, ii))); 
     
-    mean_d(ii) = mean(d(idx));
+    mean_d(ii) = nanmean(d(idx));
 
     quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [1,0,0], 'AutoScale', 0, 'LineWidth', 2), axis equal
     hold on
