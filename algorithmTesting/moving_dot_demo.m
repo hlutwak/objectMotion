@@ -17,16 +17,16 @@ seed=2;
 rng(seed) % to have random dots that appear in the same "random" place each time
 ns = 1; % number of seconds
 world_speed = 1; % m/s speed of the observer in a straight line
-fps = Screen(screenNumber,'FrameRate'); %120
+fps = 120; %Screen(screenNumber,'FrameRate'); %120
 if fps == 0, fps = 120; end
  
 height = .5;
 % gaze_angle = 15;
 fixation = 3;
 speeds = 0.02:0.02:0.1; %speeds m/s, for target
-speeds =  0.075; % 0.0187, 0.0375
+speeds =  0.0375; % 0.0187, 0.0375
 s = 1;
-directions = deg2rad([270, 45, 90, 120,135, 180, 230, 90, 315]) ;
+directions = deg2rad([290, 45, 90, 120,135, 180, 230, 90, 315]) ;
 d = 1;
 depth_range = .1;
  
@@ -79,7 +79,7 @@ fixation_idx = length(dots);
 % stationary on left and moving on right to demonstrate simulation with
 % correct direction degree labels - left hand side object always gets
 % mirror added motion
-stationary_target = [-0.5, aboveground+height-b, dim(3)/3; 0.5, aboveground+height-b, dim(3)/3];
+stationary_target = [-0.5, aboveground+height-b, dim(3)/2; 0.5, aboveground+height-b, dim(3)/2];
 % stationary then target
  
 for obj = 1:2 %stationary obj and moving obj
@@ -365,7 +365,7 @@ for ii = 1 %1:ns*fps-1
     pause(1/fps)
 end
 
-%% calculating distance to constraint segment
+% calculating distance to constraint segment
 % 
 
 figure
