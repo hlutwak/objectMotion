@@ -24,11 +24,12 @@ height = .5;
 % gaze_angle = 15;
 fixation = 3;
 speeds = 0.02:0.02:0.1; %speeds m/s, for target
-speeds =  0.0375; % 0.0187, 0.0375
+speeds =  0.5; % 0.0187, 0.0375
 s = 1;
-directions = deg2rad([290, 45, 90, 120,135, 180, 230, 90, 315]) ;
+directions = deg2rad([270, 45, 90, 120,135, 180, 230, 90, 315]) ;
 d = 1;
-depth_range = .1;
+depth_range = .2;
+object_dist = 2;
  
 dim = [6,0,6]; % extent of where dots can be in m: X, Y, Z. Depth is more than how far you're travelling (ns *speed) + a little extra 
 % 5 m across
@@ -79,7 +80,7 @@ fixation_idx = length(dots);
 % stationary on left and moving on right to demonstrate simulation with
 % correct direction degree labels - left hand side object always gets
 % mirror added motion
-stationary_target = [-0.5, aboveground+height-b, dim(3)/2; 0.5, aboveground+height-b, dim(3)/2];
+stationary_target = [-0.5, aboveground+height-b, object_dist; 0.5, aboveground+height-b, object_dist];
 % stationary then target
  
 for obj = 1:2 %stationary obj and moving obj
@@ -324,7 +325,7 @@ figure
 set(gcf,'color','w');
 
 
-for ii = 1 %1:ns*fps-1
+for ii = 1 %:ns*fps-1
     clf
     center_point = [mean([max(x(center,ii)),min(x(center,ii))]), mean([max(y(center,ii)),min(y(center,ii))])];
     distance2center_point = vecnorm((center_point - [x(:,ii),y(:,ii)])');
@@ -374,7 +375,7 @@ set(gcf,'color','w');
 
 mean_d = NaN(ns*fps-1,1);
 
-for ii = 1: ns*fps-1
+for ii = ns*fps-1
     clf
 
     onscreen = find(I(:,ii));
@@ -404,6 +405,7 @@ for ii = 1: ns*fps-1
 %     
 end
  
+disp(nanmean(mean_d))
 
 %% calculations for finding optimal directions for object motion
 ii= 1;
