@@ -17,7 +17,7 @@ seed=2;
 rng(seed) % to have random dots that appear in the same "random" place each time
 ns = 1; % number of seconds
 world_speed = 1; % m/s speed of the observer in a straight line
-fps = 120; %Screen(screenNumber,'FrameRate'); %120
+fps = 120; %Screen(screenNumber,'FrameRate'); % should be 144 to match experiment
 if fps == 0, fps = 120; end
  
 height = .5;
