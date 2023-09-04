@@ -17,14 +17,14 @@ seed=2;
 rng(seed) % to have random dots that appear in the same "random" place each time
 ns = 1; % number of seconds
 world_speed = 1; % m/s speed of the observer in a straight line
-fps = 120; %Screen(screenNumber,'FrameRate'); % should be 144 to match experiment
+fps = 144; %Screen(screenNumber,'FrameRate'); % should be 144 to match experiment
 if fps == 0, fps = 120; end
  
 height = .5;
 % gaze_angle = 15;
 fixation = 3;
 speeds = 0.02:0.02:0.1; %speeds m/s, for target
-speeds =  0.5; % 0.0187, 0.0375
+speeds =  .15; % 0.0187, 0.0375
 s = 1;
 directions = deg2rad([270, 45, 90, 120,135, 180, 230, 90, 315]) ;
 d = 1;
@@ -366,7 +366,55 @@ for ii = 1 %:ns*fps-1
     pause(1/fps)
 end
 
-% calculating distance to constraint segment
+%% calculating distance to constraint segment for just target
+
+
+figure
+set(gcf,'position',[250, 250, 800, 400])
+set(gcf,'color','w');
+
+mean_d = NaN(ns*fps-1,1);
+
+for ii = 1:ns*fps-1
+
+    onscreen = find(I(:,ii));
+    
+    [ti, target_onscreen, tb] = intersect(onscreen, target_idx);
+    
+    if isempty(target_onscreen)
+        % don't change mean_d
+    else
+        d = NaN(1, length(target_onscreen));
+        for jj = 1:length(target_onscreen)
+            d(jj) = point2segment([rvelocityX(onscreen(target_onscreen(jj)),ii); rvelocityY(onscreen(target_onscreen(jj)),ii)], v_constraint_far(:,onscreen(target_onscreen(jj)),ii), v_constraint_close(:,onscreen(target_onscreen(jj)),ii));
+        end
+        mean_d(ii) = mean(d);
+    %%%%
+    
+    
+     clf
+    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [1,0,0], 'AutoScale', 0, 'LineWidth', 2), axis equal
+    hold on
+    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [.25, .25, .25], 'AutoScale', 0, 'LineWidth', 2), axis equal
+    hold on, quiver(x(onscreen(target_onscreen(jj)),ii), -y(onscreen(target_onscreen(jj)),ii), v_constraint(1,onscreen(target_onscreen(jj)),ii)', -v_constraint(2,onscreen(target_onscreen(jj)),ii)', 'color', [0,0,1], 'AutoScale', 'off', 'LineWidth', 2), axis equal
+    hold on, scatter(x(onscreen(target_onscreen(jj)),ii), -y(onscreen(target_onscreen(jj)),ii), 100,'r');
+    hold on, scatter(x(target_idx,ii), -y(target_idx,ii), 200, 'g');
+%     hold on, scatter(x(fixation_idx,ii), -y(fixation_idx,ii), 50, 'b', 'filled')
+    for kk = 1:length(target_onscreen)
+        text(x(onscreen(target_onscreen(kk)), ii), -y(onscreen(target_onscreen(kk)), ii), num2str(d(kk)))
+    end
+%     xlim([-15,15])
+%     ylim([-10,10])
+%     axis off
+%     pause(1/fps)
+    end
+%     
+end
+ 
+disp(nanmean(mean_d))
+
+
+%% calculating distance to constraint segment
 % 
 
 figure
@@ -375,7 +423,7 @@ set(gcf,'color','w');
 
 mean_d = NaN(ns*fps-1,1);
 
-for ii = ns*fps-1
+for ii = 1:ns*fps-1
     clf
 
     onscreen = find(I(:,ii));
