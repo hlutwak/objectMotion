@@ -26,10 +26,12 @@ fixation = 3;
 speeds = 0.02:0.02:0.1; %speeds m/s, for target
 speeds =  .15; % 0.0187, 0.0375
 s = 1;
-directions = deg2rad([270, 45, 90, 120,135, 180, 230, 90, 315]) ;
+directions = deg2rad([350, 45, 90, 120,135, 180, 230, 90, 315]) ;
 d = 1;
-depth_range = .2;
 object_dist = 2;
+
+calculate_segment = 0; % calculate to point
+depth_range = .01;
  
 dim = [6,0,6]; % extent of where dots can be in m: X, Y, Z. Depth is more than how far you're travelling (ns *speed) + a little extra 
 % 5 m across
@@ -215,84 +217,6 @@ if visualize
     title('first frame')
 end
  
-%  plot velocities
-% figure
-% for ii = 1:ns*fps-1
-%     quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
-%  
-%     xlim([-30,30])
-%     ylim([-20,20])
-%  
-%     pause(1/fps)
-% end
- 
-% figure
-% ii = ns*fps-2;
-% scatter(x(I(:,ii),ii), -y(I(:,ii),ii), 20,'k', 'filled');
-% hold on,    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [0, 0, .5], 'AutoScale','off', 'LineWidth', 2), axis equal
-%  
-% hold on,    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint_far(1,I(:,ii),ii)', -v_constraint_far(2,I(:,ii),ii)', 'color', [.5, 0, 0], 'AutoScale','off', 'LineWidth', 2), axis equal
-%  
-% hold on, quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [.25, .25, .25], 'AutoScale','off', 'LineWidth', 2), axis equal
-%  
-% ii = ns*fps-1;
-% hold on, scatter(x(I(:,ii),ii), -y(I(:,ii),ii),20, 'b', 'filled');
-%     hold on, scatter(x(end,ii), -y(end,ii), 10,'c', 'filled');
-%  
-%  
-% figure
-% for ii = 1:ns*fps-1
-%    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [.25, .25, .25], 'AutoScale','off', 'LineWidth', 2), axis equal
-%     xlim([-30,30])
-%     ylim([-20,20])
-%  
-%     pause(1/fps)
-% end
- 
-% %% 
-% % look at difference between screen velocity and constraint velocity
-% % label moving object in red
-% figure
-% set(gcf,'position',[250, 250, 800, 600])
-% set(gcf,'color','w');
-% for ii = 1:ns*fps-1 %ns*fps-1
-%     clf
-%     % getting distance to constraint segment
-% %     vec = v_constraint(:,:,ii)'- v_constraint_far(:,:,ii)'; %vector between close and far velocities
-% %     slope = vec(:,2)./vec(:,1); 
-% %     intercept = v_constraint(2,:,ii)' - slope.*v_constraint(1,:,ii)'; %intercept = y-slope*x
-% %   
-%     % P1 = (x1, y1) = v_constraint, P2 =(x2,y2) = v_constraint_far, P0 =
-%     % (x0,y0) = rvelocityX, rvelocityY
-% %     a = (v_constraint_far(1,:,ii)-v_constraint(1,:,ii)).*(v_constraint(2,:,ii)-rvelocityY(:,ii)');
-% %     b = (v_constraint(1,:,ii)-rvelocityX(:,ii)').*(v_constraint_far(2,:,ii)-v_constraint(2,:,ii));
-% %     c = sqrt((v_constraint_far(1,:,ii) - v_constraint(1,:,ii)).^2 + (v_constraint_far(2,:,ii) - v_constraint(2,:,ii)).^2);
-% %     d = (abs(a-b)./c)';
-%     d = vecnorm((v_constraint(:,:,ii)'- [rvelocityX(:,ii) rvelocityY(:,ii)])')';
-%     val = max(d(I(:,ii)));
-%     idx = find(d == val);
-%     val=maxk(d(I(:,ii)),dotsperobj);
-%     idx = NaN(size(val));
-%     for v = 1:length(val)
-%         idx(v) = find(d == val(v));
-%     end
-% %     scatter(d(end), val)
-% %     xlim([0,0.25]); 
-% %     pause(1/fps*2)
-%     quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [.25, 0, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
-%     hold on
-%     quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
-% %     hold on, quiver(x(idx,ii), -y(idx,ii), v_constraint(1,idx,ii)', -v_constraint(2,idx,ii)', 'color', [1,0,0], 'AutoScale', 1, 'LineWidth', 2), axis equal
-% %     hold on, scatter(x(idx,ii), -y(idx,ii), 10,'r', 'filled');
-% %     hold on, scatter(x(end,ii), -y(end,ii), 10, 'g', 'filled');
-% %     hold on, scatter(x(fixation_idx,ii), -y(fixation_idx,ii), 10, 'b', 'filled')
-% %     text(x(idx, ii), -y(idx, ii), num2str(val))
-%     xlim([-15,15])
-%     ylim([-10,10])
-%     axis off
-%     pause(1/fps)
-%     
-% end
  
 % surround velocities
 % calculate in terms of degrees
@@ -366,7 +290,7 @@ for ii = 1 %:ns*fps-1
     pause(1/fps)
 end
 
-%% calculating distance to constraint segment for just target
+% calculating distance to constraint segment/point for just target
 
 
 figure
@@ -386,7 +310,59 @@ for ii = 1:ns*fps-1
     else
         d = NaN(1, length(target_onscreen));
         for jj = 1:length(target_onscreen)
-            d(jj) = point2segment([rvelocityX(onscreen(target_onscreen(jj)),ii); rvelocityY(onscreen(target_onscreen(jj)),ii)], v_constraint_far(:,onscreen(target_onscreen(jj)),ii), v_constraint_close(:,onscreen(target_onscreen(jj)),ii));
+            if calculate_segment
+                d(jj) = point2segment([rvelocityX(onscreen(target_onscreen(jj)),ii); rvelocityY(onscreen(target_onscreen(jj)),ii)], v_constraint_far(:,onscreen(target_onscreen(jj)),ii), v_constraint_close(:,onscreen(target_onscreen(jj)),ii));
+            else
+                dif = [rvelocityX(onscreen(target_onscreen(jj)),ii); rvelocityY(onscreen(target_onscreen(jj)),ii)] - v_constraint(:,onscreen(target_onscreen(jj)),ii);
+                d(jj) = norm(dif);
+            end
+        end
+        mean_d(ii) = mean(d);
+    %%%%
+    
+    
+     clf
+    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [1,0,0], 'AutoScale', 0, 'LineWidth', 2), axis equal
+    hold on
+    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [.25, .25, .25], 'AutoScale', 0, 'LineWidth', 2), axis equal
+    hold on, quiver(x(onscreen(target_onscreen(jj)),ii), -y(onscreen(target_onscreen(jj)),ii), v_constraint(1,onscreen(target_onscreen(jj)),ii)', -v_constraint(2,onscreen(target_onscreen(jj)),ii)', 'color', [0,0,1], 'AutoScale', 'off', 'LineWidth', 2), axis equal
+    hold on, scatter(x(onscreen(target_onscreen(jj)),ii), -y(onscreen(target_onscreen(jj)),ii), 100,'r');
+    hold on, scatter(x(target_idx,ii), -y(target_idx,ii), 200, 'g');
+%     hold on, scatter(x(fixation_idx,ii), -y(fixation_idx,ii), 50, 'b', 'filled')
+    for kk = 1:length(target_onscreen)
+        text(x(onscreen(target_onscreen(kk)), ii), -y(onscreen(target_onscreen(kk)), ii), num2str(d(kk)))
+    end
+%     xlim([-15,15])
+%     ylim([-10,10])
+%     axis off
+%     pause(1/fps)
+    end
+%     
+end
+ 
+disp(nanmean(mean_d))
+
+%% calculating distance to constraint point
+
+figure
+set(gcf,'position',[250, 250, 800, 400])
+set(gcf,'color','w');
+
+mean_d = NaN(ns*fps-1,1);
+
+for ii = 1:ns*fps-1
+
+    onscreen = find(I(:,ii));
+    
+    [ti, target_onscreen, tb] = intersect(onscreen, target_idx);
+    
+    if isempty(target_onscreen)
+        % don't change mean_d
+    else
+        d = NaN(1, length(target_onscreen));
+        for jj = 1:length(target_onscreen)
+            dif = [rvelocityX(onscreen(target_onscreen(jj)),ii); rvelocityY(onscreen(target_onscreen(jj)),ii)] - v_constraint(:,onscreen(target_onscreen(jj)),ii);
+            d(jj) = norm(dif);
         end
         mean_d(ii) = mean(d);
     %%%%
@@ -415,7 +391,7 @@ disp(nanmean(mean_d))
 
 
 %% calculating distance to constraint segment
-% 
+% and seeing if max is the target
 
 figure
 set(gcf,'position',[250, 250, 800, 400])
@@ -429,6 +405,7 @@ for ii = 1:ns*fps-1
     onscreen = find(I(:,ii));
     d = NaN(1, length(onscreen));
     for jj = 1:length(onscreen)
+        
         d(jj) = point2segment([rvelocityX(onscreen(jj),ii); rvelocityY(onscreen(jj),ii)], v_constraint_far(:,onscreen(jj),ii), v_constraint_close(:,onscreen(jj),ii));
     end
     [val,idx] = maxk(d,sum(I(target_idx, ii))); 
@@ -555,5 +532,88 @@ for ii=1:ns*fps
 end
  
 sca;
+
+
+%% archive code
+
+
+%  plot velocities
+% figure
+% for ii = 1:ns*fps-1
+%     quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
+%  
+%     xlim([-30,30])
+%     ylim([-20,20])
+%  
+%     pause(1/fps)
+% end
+ 
+% figure
+% ii = ns*fps-2;
+% scatter(x(I(:,ii),ii), -y(I(:,ii),ii), 20,'k', 'filled');
+% hold on,    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [0, 0, .5], 'AutoScale','off', 'LineWidth', 2), axis equal
+%  
+% hold on,    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint_far(1,I(:,ii),ii)', -v_constraint_far(2,I(:,ii),ii)', 'color', [.5, 0, 0], 'AutoScale','off', 'LineWidth', 2), axis equal
+%  
+% hold on, quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [.25, .25, .25], 'AutoScale','off', 'LineWidth', 2), axis equal
+%  
+% ii = ns*fps-1;
+% hold on, scatter(x(I(:,ii),ii), -y(I(:,ii),ii),20, 'b', 'filled');
+%     hold on, scatter(x(end,ii), -y(end,ii), 10,'c', 'filled');
+%  
+%  
+% figure
+% for ii = 1:ns*fps-1
+%    quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [.25, .25, .25], 'AutoScale','off', 'LineWidth', 2), axis equal
+%     xlim([-30,30])
+%     ylim([-20,20])
+%  
+%     pause(1/fps)
+% end
+ 
+% %% 
+% % look at difference between screen velocity and constraint velocity
+% % label moving object in red
+% figure
+% set(gcf,'position',[250, 250, 800, 600])
+% set(gcf,'color','w');
+% for ii = 1:ns*fps-1 %ns*fps-1
+%     clf
+%     % getting distance to constraint segment
+% %     vec = v_constraint(:,:,ii)'- v_constraint_far(:,:,ii)'; %vector between close and far velocities
+% %     slope = vec(:,2)./vec(:,1); 
+% %     intercept = v_constraint(2,:,ii)' - slope.*v_constraint(1,:,ii)'; %intercept = y-slope*x
+% %   
+%     % P1 = (x1, y1) = v_constraint, P2 =(x2,y2) = v_constraint_far, P0 =
+%     % (x0,y0) = rvelocityX, rvelocityY
+% %     a = (v_constraint_far(1,:,ii)-v_constraint(1,:,ii)).*(v_constraint(2,:,ii)-rvelocityY(:,ii)');
+% %     b = (v_constraint(1,:,ii)-rvelocityX(:,ii)').*(v_constraint_far(2,:,ii)-v_constraint(2,:,ii));
+% %     c = sqrt((v_constraint_far(1,:,ii) - v_constraint(1,:,ii)).^2 + (v_constraint_far(2,:,ii) - v_constraint(2,:,ii)).^2);
+% %     d = (abs(a-b)./c)';
+%     d = vecnorm((v_constraint(:,:,ii)'- [rvelocityX(:,ii) rvelocityY(:,ii)])')';
+%     val = max(d(I(:,ii)));
+%     idx = find(d == val);
+%     val=maxk(d(I(:,ii)),dotsperobj);
+%     idx = NaN(size(val));
+%     for v = 1:length(val)
+%         idx(v) = find(d == val(v));
+%     end
+% %     scatter(d(end), val)
+% %     xlim([0,0.25]); 
+% %     pause(1/fps*2)
+%     quiver(x(I(:,ii),ii), -y(I(:,ii),ii), rvelocityX(I(:,ii),ii), -rvelocityY(I(:,ii),ii), 'color', [.25, 0, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
+%     hold on
+%     quiver(x(I(:,ii),ii), -y(I(:,ii),ii), v_constraint(1,I(:,ii),ii)', -v_constraint(2,I(:,ii),ii)', 'color', [.25, .25, .25], 'AutoScale', 1, 'LineWidth', 2), axis equal
+% %     hold on, quiver(x(idx,ii), -y(idx,ii), v_constraint(1,idx,ii)', -v_constraint(2,idx,ii)', 'color', [1,0,0], 'AutoScale', 1, 'LineWidth', 2), axis equal
+% %     hold on, scatter(x(idx,ii), -y(idx,ii), 10,'r', 'filled');
+% %     hold on, scatter(x(end,ii), -y(end,ii), 10, 'g', 'filled');
+% %     hold on, scatter(x(fixation_idx,ii), -y(fixation_idx,ii), 10, 'b', 'filled')
+% %     text(x(idx, ii), -y(idx, ii), num2str(val))
+%     xlim([-15,15])
+%     ylim([-10,10])
+%     axis off
+%     pause(1/fps)
+%     
+% end
  
  
