@@ -24,14 +24,14 @@ height = .5;
 % gaze_angle = 15;
 fixation = 3;
 speeds = 0.02:0.02:0.1; %speeds m/s, for target
-speeds =  .15; % 0.0187, 0.0375
+speeds =  0.0625 ; % 0.0187, 0.0375
 s = 1;
 directions = deg2rad([350, 45, 90, 120,135, 180, 230, 90, 315]) ;
 d = 1;
 object_dist = 2;
 
 calculate_segment = 0; % calculate to point
-depth_range = .01;
+depth_range = .2;
  
 dim = [6,0,6]; % extent of where dots can be in m: X, Y, Z. Depth is more than how far you're travelling (ns *speed) + a little extra 
 % 5 m across
