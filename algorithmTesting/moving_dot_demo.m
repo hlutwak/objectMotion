@@ -24,9 +24,9 @@ height = .5;
 % gaze_angle = 15;
 fixation = 3;
 % speeds = 0.02:0.02:0.1; %speeds m/s, for target
-speeds =  [0.5 0.25  .125    0.0625]; % 0.0187, 0.0375
+speeds =  [.125  0.0625, 0.0313]; % 0.0187, 0.0375
 % speeds = 0.5;
-directions = deg2rad([90 250  270  290  350]) ;
+directions = deg2rad([250,260,270,280,290]) ;  %  [90,250,260,280,290]
 % directions = deg2rad(250);
 conditions = fullfact([numel(speeds), numel(directions)]); 
 
@@ -96,6 +96,8 @@ end
 nDots = length(dots); % total numbber of dots
 stationary_idx = (length(dots)+1-2*dotsperobj):length(dots)-dotsperobj;
 target_idx = (length(dots)+1-dotsperobj):length(dots);
+
+start_dots = dots;
  
  
 % visualize dots, orient so that Z axis extends from observer to direction
@@ -124,6 +126,7 @@ trajectory = [zeros(ns*fps+1,1), zeros(ns*fps+1,1),(0:(world_speed/fps):(ns*worl
  
 % loop over speeds and directions for object
 distance = NaN(numel(speeds), numel(directions));
+
 
 for cond = 1:size(conditions, 1) 
     
@@ -168,7 +171,11 @@ for cond = 1:size(conditions, 1)
         % moving observer = moving world relative to observer in equal and opposite way
         % recalculating world coordinates in terms of observer reference frame,
         % where observer is always at the origin
-        dots = dots - velocity; %shift dots in world coordinates
+        if ii == 1
+            dots = start_dots - velocity;
+        else
+            dots = dots - velocity; %shift dots in world coordinates
+        end
         dots(target_idx,:) = dots(target_idx:end,:)+t_vel; %add velocity to moving object
         
         % if the observer rotates, rotate the world based on 3D rotation matrix
@@ -241,12 +248,12 @@ for cond = 1:size(conditions, 1)
     ylims = [-.025,.025];
     
     
-    figure
+%     subplot(length(speeds),length(directions), cond)
+    figure(1)
     % set(gcf,'position',[500, 500, 600, 400])
     set(gcf,'color','w');
     
-    
-    for ii = 1 %:ns*fps-1
+    ii = 1; %:ns*fps-1
         clf
         center_point = [mean([max(x(center,ii)),min(x(center,ii))]), mean([max(y(center,ii)),min(y(center,ii))])];
         distance2center_point = vecnorm((center_point - [x(:,ii),y(:,ii)])');
@@ -284,8 +291,8 @@ for cond = 1:size(conditions, 1)
         axis equal
         xlim(xlims)
         ylim(ylims)
-        pause(1/fps)
-    end
+%         pause(1/fps)
+    
     
     % calculating distance to constraint segment/point for just target
     %
@@ -335,6 +342,7 @@ for cond = 1:size(conditions, 1)
         end
         %
     end
+    
     distance(conditions(cond,1), conditions(cond,2)) = nanmean(mean_d);
 
 end
